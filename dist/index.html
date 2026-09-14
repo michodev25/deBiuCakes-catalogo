@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Catálogo de repostería artesanal de LaBiuCakes: cakes, mini cakes, cupcakes y dulces hechos por encargo."
+    />
+    <meta name="theme-color" content="#fff9ef" />
+    <title>LaBiuCakes · Repostería artesanal</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='10' fill='%23d96f91'/%3E%3Cpath d='M8 20h16v3H8zm2-2c0-5 2-8 6-8s6 3 6 8z' fill='%23fff9ef'/%3E%3Ccircle cx='16' cy='8' r='2' fill='%23b9dce7'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <a class="skip-link" href="#catalogo">Saltar al catálogo</a>
+
+    <div class="announcement">
+      <span>Pedidos con 48 h de antelación</span>
+      <span class="announcement-dot" aria-hidden="true"></span>
+      <span>La Habana</span>
+    </div>
+
+    <header class="site-header">
+      <a class="wordmark" href="#inicio" aria-label="LaBiuCakes, inicio">
+        <span>LaBiu</span>
+        <small>CAKES</small>
+      </a>
+
+      <nav class="desktop-nav" aria-label="Navegación principal">
+        <a class="active" href="#catalogo">Catálogo</a>
+        <a href="#como-pedir">Cómo pedir</a>
+        <a href="#contacto">Contacto</a>
+      </nav>
+
+      <button class="cart-button" type="button" data-open-cart aria-label="Abrir carrito">
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M3 4h2l2.2 10.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.6L20.5 8H7" />
+          <circle cx="10" cy="20" r="1" />
+          <circle cx="18" cy="20" r="1" />
+        </svg>
+        <span>Mi pedido</span>
+        <strong class="cart-count" data-cart-count>0</strong>
+      </button>
+    </header>
+
+    <main id="inicio">
+      <section class="intro" aria-labelledby="intro-title">
+        <div class="intro-copy">
+          <p class="eyebrow">Repostería artesanal · hecha por encargo</p>
+          <h1 id="intro-title">Momentos dulces,<br /><em>hechos a tu manera.</em></h1>
+          <p class="intro-text">
+            Cakes, mini cakes y detalles delicados para celebrar bonito. Elige tu favorito y prepara tu pedido.
+          </p>
+          <a class="primary-cta" href="#catalogo">
+            Ver catálogo
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M14 7l5 5-5 5" /></svg>
+          </a>
+        </div>
+
+        <div class="intro-visual" aria-label="Producto destacado">
+          <div class="hero-image-shell">
+            <img data-hero-image src="https://images.unsplash.com/photo-1604413191066-4dd20bedf486?auto=format&amp;fit=crop&amp;fm=jpg&amp;q=84&amp;w=1400" alt="Cake artesanal decorado con flores rosadas" />
+            <div class="image-placeholder" aria-hidden="true">
+              <span>LaBiu</span>
+            </div>
+          </div>
+          <div class="hero-note">
+            <span>Favorito</span>
+            <strong>Jardín de fresas</strong>
+            <small>Desde $7 800 CUP</small>
+          </div>
+          <div class="seal" aria-hidden="true">HECHO<br />CON AMOR</div>
+        </div>
+      </section>
+
+      <section class="catalog" id="catalogo" aria-labelledby="catalog-title">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Elige tu antojo</p>
+            <h2 id="catalog-title">Nuestro catálogo</h2>
+          </div>
+          <p><span data-result-count>8</span> opciones disponibles</p>
+        </div>
+
+        <div class="catalog-tools">
+          <label class="search-box">
+            <span class="sr-only">Buscar en el catálogo</span>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="m20 20-4-4" /></svg>
+            <input id="search" type="search" placeholder="¿Qué te provoca hoy?" autocomplete="off" />
+          </label>
+          <div class="category-list" id="category-list" aria-label="Categorías"></div>
+        </div>
+
+        <div class="product-grid" id="product-grid" aria-live="polite"></div>
+        <div class="empty-state" id="empty-state" hidden>
+          <span aria-hidden="true">♡</span>
+          <h3>No encontramos ese dulce</h3>
+          <p>Prueba con otra palabra o categoría.</p>
+          <button type="button" data-clear-filters>Ver todo el catálogo</button>
+        </div>
+      </section>
+
+      <section class="how-to" id="como-pedir" aria-labelledby="how-title">
+        <div>
+          <p class="eyebrow">Simple y personal</p>
+          <h2 id="how-title">Tu celebración comienza aquí</h2>
+        </div>
+        <ol>
+          <li><span>01</span><strong>Elige</strong><p>Agrega tus dulces favoritos al pedido.</p></li>
+          <li><span>02</span><strong>Personaliza</strong><p>Cuéntanos colores, sabores y fecha.</p></li>
+          <li><span>03</span><strong>Confirma</strong><p>Envíanos tu selección por WhatsApp.</p></li>
+        </ol>
+      </section>
+    </main>
+
+    <footer id="contacto">
+      <a class="wordmark footer-mark" href="#inicio"><span>LaBiu</span><small>CAKES</small></a>
+      <p>Repostería artesanal para tus momentos más bonitos.</p>
+      <div class="footer-links">
+        <a href="#catalogo">Catálogo</a>
+        <a href="#como-pedir">Pedidos</a>
+        <a href="https://instagram.com" target="_blank" rel="noreferrer">Instagram</a>
+      </div>
+      <small>Catálogo demostrativo · 2026</small>
+    </footer>
+
+    <div class="drawer-layer" data-drawer-layer hidden>
+      <button class="drawer-backdrop" type="button" data-close-cart aria-label="Cerrar carrito"></button>
+      <aside class="cart-drawer" aria-labelledby="cart-title" aria-modal="true" role="dialog">
+        <div class="drawer-header">
+          <div>
+            <p class="eyebrow">Tu selección</p>
+            <h2 id="cart-title">Mi pedido</h2>
+          </div>
+          <button class="icon-button" type="button" data-close-cart aria-label="Cerrar">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+          </button>
+        </div>
+        <div class="cart-items" data-cart-items></div>
+        <div class="cart-empty" data-cart-empty>
+          <span aria-hidden="true">♡</span>
+          <h3>Tu pedido está vacío</h3>
+          <p>Agrega algo delicioso del catálogo.</p>
+          <button class="secondary-button" type="button" data-close-cart>Seguir mirando</button>
+        </div>
+        <div class="cart-summary" data-cart-summary hidden>
+          <label for="order-note">Nota para LaBiuCakes</label>
+          <textarea id="order-note" rows="3" placeholder="Ej: lo necesito para el sábado, tonos rosa…"></textarea>
+          <div class="total-row"><span>Total estimado</span><strong data-cart-total>$0 CUP</strong></div>
+          <button class="whatsapp-button" type="button" data-checkout>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 11.5a8 8 0 0 1-11.8 7L4 20l1.5-4A8 8 0 1 1 20 11.5Z" /><path d="M9 8.5c.5 3 2 4.5 5 5" /></svg>
+            Enviar pedido por WhatsApp
+          </button>
+          <small>El precio final se confirma al personalizar tu pedido.</small>
+        </div>
+      </aside>
+    </div>
+
+    <dialog class="product-dialog" id="product-dialog">
+      <button class="dialog-close icon-button" type="button" data-close-dialog aria-label="Cerrar">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+      <div class="dialog-image">
+        <img data-dialog-image src="https://images.unsplash.com/photo-1604413191066-4dd20bedf486?auto=format&amp;fit=crop&amp;fm=jpg&amp;q=82&amp;w=900" alt="" />
+      </div>
+      <div class="dialog-content">
+        <p class="eyebrow" data-dialog-category></p>
+        <h2 data-dialog-name></h2>
+        <p data-dialog-description></p>
+        <div class="dialog-meta">
+          <span><strong>48 h</strong> de antelación</span>
+          <span><strong>Artesanal</strong> hecho a mano</span>
+        </div>
+        <div class="dialog-action">
+          <strong data-dialog-price></strong>
+          <button class="add-button" type="button" data-dialog-add>Agregar al pedido</button>
+        </div>
+      </div>
+    </dialog>
+
+    <div class="toast" role="status" aria-live="polite" data-toast></div>
+
+    <nav class="mobile-nav" aria-label="Navegación móvil">
+      <a class="active" href="#inicio"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 10 8-6 8 6v9H4z" /></svg><span>Inicio</span></a>
+      <a href="#catalogo"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v14H4zM8 5V3m8 2V3M4 10h16" /></svg><span>Catálogo</span></a>
+      <button type="button" data-open-cart><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2 10h11l2-7H7M9 20h.01M18 20h.01" /></svg><span>Pedido</span><b data-cart-count>0</b></button>
+    </nav>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
