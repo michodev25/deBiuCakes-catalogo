@@ -6,6 +6,7 @@ preview-*.png
 .env.*
 !.env.example
 .vercel/
+a
 
 
 #Ignore vscode AI rules
