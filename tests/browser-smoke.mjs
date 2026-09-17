@@ -1,0 +1,85 @@
+import assert from 'node:assert/strict';
+
+const endpoint = process.env.CHROME_DEBUG_URL || 'http://127.0.0.1:9228';
+const site = process.env.CAKE_SITE_URL || 'http://127.0.0.1:4173';
+const targets = await fetch(endpoint + '/json/list').then((response) => response.json());
+const target = targets.find((item) => item.type === 'page');
+if (!target) throw new Error('Chrome no tiene una pestaña de pruebas.');
+
+const socket = new WebSocket(target.webSocketDebuggerUrl);
+await new Promise((resolve, reject) => {
+  socket.addEventListener('open', resolve, { once: true });
+  socket.addEventListener('error', reject, { once: true });
+});
+let nextId = 1;
+const pending = new Map();
+socket.addEventListener('message', (event) => {
+  const message = JSON.parse(event.data);
+  if (!message.id || !pending.has(message.id)) return;
+  const { resolve, reject } = pending.get(message.id);
+  pending.delete(message.id);
+  if (message.error) reject(new Error(message.error.message));
+  else resolve(message.result);
+});
+function send(method, params = {}) {
+  const id = nextId++;
+  return new Promise((resolve, reject) => {
+    pending.set(id, { resolve, reject });
+    socket.send(JSON.stringify({ id, method, params }));
+  });
+}
+async function evaluate(expression) {
+  const result = await send('Runtime.evaluate', { expression, returnByValue: true, awaitPromise: true });
+  if (result.exceptionDetails) throw new Error(result.exceptionDetails.text);
+  return result.result.value;
+}
+async function waitFor(expression, expected = true) {
+  for (let attempt = 0; attempt < 40; attempt++) {
+    if (await evaluate(expression) === expected) return;
+    await new Promise((resolve) => setTimeout(resolve, 150));
+  }
+  throw new Error('Tiempo agotado esperando: ' + expression);
+}
+
+try {
+  await send('Page.enable');
+  await send('Runtime.enable');
+  await send('Emulation.setDeviceMetricsOverride', { width: 390, height: 844, deviceScaleFactor: 1, mobile: true });
+  await send('Page.navigate', { url: site + '/' });
+  await waitFor('document.querySelectorAll(".product-card").length === 8');
+  await evaluate('localStorage.removeItem("labiucakes-cart"); location.reload()');
+  await waitFor('document.querySelectorAll(".product-card").length === 8');
+  assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, 'La página no debe desbordarse horizontalmente.');
+  await evaluate('document.querySelector("[data-card-increase]").click()');
+  await waitFor('document.querySelector(".card-quantity span")?.textContent === "1"');
+  assert.equal(await evaluate('document.querySelector("[data-cart-count]").textContent'), '1');
+  await evaluate('document.querySelector("[data-card-increase]").click()');
+  await waitFor('document.querySelector(".card-quantity span")?.textContent === "2"');
+  await evaluate('document.querySelector("[data-card-decrease]").click()');
+  await waitFor('document.querySelector(".card-quantity span")?.textContent === "1"');
+  const controlsFit = await evaluate('(() => { const a=document.querySelector(".card-quantity").getBoundingClientRect(); const b=document.querySelector(".product-media").getBoundingClientRect(); return a.left>=b.left && a.right<=b.right && a.bottom<=b.bottom; })()');
+  assert.equal(controlsFit, true, 'El selector debe quedar dentro de la foto.');
+  await evaluate('document.querySelector(".mobile-nav [data-open-cart]").click()');
+  await waitFor('document.querySelector("[data-drawer-layer]").hidden === false');
+  assert.equal(await evaluate('document.querySelectorAll(".cart-item img").length'), 1);
+  await evaluate('document.querySelector("[data-close-cart]").click()');
+  await send('Page.navigate', { url: site + '/cakeadmin' });
+  await waitFor('document.querySelector("#login-form") !== null');
+  assert.equal(await evaluate('document.querySelector("#login-view").hidden'), false);
+  assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, 'El panel móvil no debe desbordarse horizontalmente.');
+  if (process.env.CAKE_TEST_PASSWORD) {
+    await evaluate('document.querySelector("#username").value = "michel"; document.querySelector("#password").value = ' + JSON.stringify(process.env.CAKE_TEST_PASSWORD) + '; document.querySelector("#login-form").requestSubmit()');
+    await waitFor('document.querySelector("#dashboard-view").hidden === false');
+    await waitFor('document.querySelectorAll(".admin-product").length === 8');
+    await evaluate('document.querySelector("[data-tab=categories]").click()');
+    assert.equal(await evaluate('document.querySelectorAll(".admin-category").length'), 4);
+    await evaluate('document.querySelector("[data-tab=products]").click(); document.querySelector("#new-product").click()');
+    assert.equal(await evaluate('document.querySelector("#editor-view").hidden'), false);
+    assert.equal(await evaluate('document.querySelectorAll("#product-category option").length'), 5);
+    console.log('Browser smoke passed: catálogo móvil, cantidad, carrito, login y gestión visual.');
+  } else {
+    console.log('Browser smoke passed: catálogo móvil, cantidad, carrito y acceso visual a Cakeadmin.');
+  }
+} finally {
+  socket.close();
+}

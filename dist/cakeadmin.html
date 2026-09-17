@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="robots" content="noindex,nofollow" />
+    <meta name="theme-color" content="#fff9ef" />
+    <title>LaBiuCakes · Cakeadmin</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/styles.css" />
+    <link rel="stylesheet" href="/admin.css" />
+  </head>
+  <body class="admin-body">
+    <a class="skip-link" href="#admin-main">Saltar al contenido</a>
+    <div class="admin-topline">Un espacio dulce para mantener todo al día <span aria-hidden="true">✳</span> LaBiuCakes</div>
+    <header class="admin-header">
+      <a class="wordmark" href="/" aria-label="LaBiuCakes, ver catálogo"><span>LaBiu</span><small>CAKES</small></a>
+      <span class="admin-header-label">Cakeadmin <span class="admin-header-dot"></span> Gestión del catálogo</span>
+      <div class="admin-header-actions">
+        <a href="/" target="_blank" rel="noopener noreferrer">Ver catálogo <span aria-hidden="true">↗</span></a>
+        <button id="logout" type="button" hidden>Cerrar sesión</button>
+      </div>
+    </header>
+
+    <main id="admin-main" class="admin-main">
+      <section id="login-view" class="login-layout">
+        <div class="login-story">
+          <p class="eyebrow">El atelier digital</p>
+          <h1>El detalle detrás<br /><em>de cada dulce.</em></h1>
+          <p>Un lugar para organizar las creaciones de LaBiuCakes y mantener el catálogo siempre bonito y actualizado.</p>
+          <div class="login-illustration" aria-hidden="true">
+            <div class="illustration-cake"><span></span><span></span><span></span></div>
+            <div class="illustration-star">✳</div>
+            <div class="illustration-caption">Hecho con amor</div>
+          </div>
+        </div>
+        <div class="login-card">
+          <div class="login-card-mark" aria-hidden="true">✿</div>
+          <p class="eyebrow">Acceso privado</p>
+          <h2>Hola de nuevo</h2>
+          <p>Entra para cuidar los productos y categorías de tu catálogo.</p>
+          <form id="login-form">
+            <label for="username">Usuario</label>
+            <input id="username" name="username" autocomplete="username" required placeholder="Tu usuario" />
+            <label for="password">Contraseña</label>
+            <input id="password" name="password" type="password" autocomplete="current-password" required placeholder="Tu contraseña" />
+            <button class="admin-primary" type="submit">Entrar al panel <span aria-hidden="true">→</span></button>
+          </form>
+          <p id="login-message" class="form-message" role="status"></p>
+          <div class="login-footnote"><span aria-hidden="true">🔒</span> Solo Michel y Zahira tienen acceso.</div>
+        </div>
+      </section>
+
+      <section id="dashboard-view" hidden>
+        <div class="dashboard-intro">
+          <div>
+            <p class="eyebrow">Tu espacio de trabajo</p>
+            <h1>El catálogo, <em>a tu manera.</em></h1>
+            <p>Organiza tus creaciones con calma. Los cambios se publican al guardar.</p>
+          </div>
+          <div class="welcome-note"><span>✳</span><div>Bienvenida, <strong id="welcome-user"></strong><small>Hoy podemos crear algo bonito.</small></div></div>
+        </div>
+        <div class="admin-stats">
+          <div><span>Productos</span><strong id="stat-products">0</strong><small>en el catálogo</small></div>
+          <div><span>Visibles</span><strong id="stat-visible">0</strong><small>para tus clientes</small></div>
+          <div><span>Categorías</span><strong id="stat-categories">0</strong><small>para explorar</small></div>
+        </div>
+        <div class="workspace-card">
+          <div class="workspace-heading">
+            <div>
+              <p class="eyebrow">Organiza tu vitrina</p>
+              <h2>Contenido del catálogo</h2>
+            </div>
+            <button class="admin-primary" id="new-product" type="button">+ Nuevo producto</button>
+          </div>
+          <div class="admin-tabs" role="tablist" aria-label="Contenido">
+            <button type="button" role="tab" aria-selected="true" data-tab="products">Productos</button>
+            <button type="button" role="tab" aria-selected="false" data-tab="categories">Categorías</button>
+          </div>
+          <section id="products-view" role="tabpanel">
+            <div class="list-caption"><span>Productos actuales</span><small>Imagen, precio y disponibilidad</small></div>
+            <div id="product-list" class="admin-product-list"></div>
+          </section>
+          <section id="categories-view" role="tabpanel" hidden>
+            <div class="category-intro"><div><h3>Tus categorías</h3><p>Agrupa cada dulce para que sea más fácil encontrarlo.</p></div><span aria-hidden="true">✿</span></div>
+            <form id="category-form" class="category-form">
+              <label for="new-category" class="sr-only">Nueva categoría</label>
+              <input id="new-category" name="category" required maxlength="50" placeholder="Nombre de la nueva categoría" />
+              <button class="admin-primary" type="submit">Agregar categoría</button>
+            </form>
+            <div id="category-list-admin" class="admin-category-list"></div>
+          </section>
+          <section id="editor-view" hidden>
+            <button type="button" class="back-button" id="cancel-editor">← Volver a productos</button>
+            <div class="editor-title"><p class="eyebrow">Detalles del dulce</p><h3 id="editor-heading">Nuevo producto</h3><p>Completa los datos que verán tus clientes.</p></div>
+            <form id="product-form">
+              <div class="editor-grid">
+                <div class="editor-fields">
+                  <label for="product-name">Nombre del producto <span>*</span></label>
+                  <input id="product-name" name="name" required maxlength="100" placeholder="Ej: Cake de fresas" />
+                  <div class="form-two">
+                    <div><label for="product-category">Categoría <span>*</span></label><select id="product-category" name="category" required></select></div>
+                    <div><label for="product-price">Precio en CUP <span>*</span></label><input id="product-price" name="price" type="number" min="1" max="1000000000" step="1" required placeholder="0" /></div>
+                  </div>
+                  <label for="product-description">Descripción</label>
+                  <textarea id="product-description" name="description" maxlength="1000" rows="5" placeholder="Sabores, tamaño, decoración y cualquier detalle especial…"></textarea>
+                  <label for="product-badge">Distintivo <span class="optional">(opcional)</span></label>
+                  <input id="product-badge" name="badge" maxlength="30" placeholder="Ej: Favorito, Nuevo, Especial" />
+                  <label class="visible-check"><input id="product-visible" name="visible" type="checkbox" checked /><span><strong>Mostrar en el catálogo</strong><small>Puedes ocultarlo sin eliminar sus datos.</small></span></label>
+                </div>
+                <div class="image-fields">
+                  <label>Fotografía del producto <span>*</span></label>
+                  <div class="image-preview" id="image-preview"><span>✿</span><p>Tu foto aparecerá aquí</p></div>
+                  <label class="upload-button" for="product-file">↑ Subir foto a Cloudinary</label>
+                  <input id="product-file" type="file" accept="image/jpeg,image/png,image/webp" />
+                  <p class="upload-hint">JPG, PNG o WebP · máximo 5 MB. La foto se guarda en la nube, no en el repositorio.</p>
+                  <label for="product-image">O usa una URL HTTPS ya alojada</label>
+                  <input id="product-image" name="image" type="url" placeholder="https://..." required />
+                </div>
+              </div>
+              <div class="editor-actions"><button class="admin-secondary" type="button" id="cancel-editor-bottom">Cancelar</button><button class="admin-primary" id="save-product" type="submit">Guardar producto</button></div>
+            </form>
+          </section>
+        </div>
+        <p id="dashboard-message" class="dashboard-message" role="status" aria-live="polite"></p>
+      </section>
+    </main>
+    <script src="/admin.js"></script>
+  </body>
+</html>
