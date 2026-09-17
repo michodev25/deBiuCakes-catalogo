@@ -1,0 +1,14 @@
+{
+  "version": 1,
+  "categories": ["Cakes", "Mini cakes", "Cupcakes", "Confituras"],
+  "products": [
+    {"id":"1","name":"Jardín de fresas","category":"Cakes","price":7800,"badge":"Favorito","image":"https://images.unsplash.com/photo-1604413191066-4dd20bedf486?auto=format&fit=crop&fm=jpg&q=82&w=900","description":"Bizcocho de vainilla, relleno de crema suave y fresas, terminado con flores de merengue en tonos rosados.","visible":true},
+    {"id":"2","name":"Mini cake Cielito","category":"Mini cakes","price":2950,"badge":"Nuevo","image":"https://images.pexels.com/photos/37108067/pexels-photo-37108067.jpeg?auto=compress&cs=tinysrgb&w=900","description":"Mini cake para dos o cuatro personas, con crema azul cielo, perlitas delicadas y relleno a elegir.","visible":true},
+    {"id":"3","name":"Cupcakes Blush · 6 u","category":"Cupcakes","price":2400,"badge":"","image":"https://images.pexels.com/photos/11073464/pexels-photo-11073464.jpeg?auto=compress&cs=tinysrgb&w=900","description":"Seis cupcakes de vainilla y chocolate con remolinos de crema, flores pequeñas y detalles nacarados.","visible":true},
+    {"id":"4","name":"Cake Rosé","category":"Cakes","price":6500,"badge":"","image":"https://images.unsplash.com/photo-1644865439228-49106cb7b601?auto=format&fit=crop&fm=jpg&q=82&w=900","description":"Cake de vainilla y frutos rojos con abundantes ondas de crema rosa, sprinkles y una terminación alegre.","visible":true},
+    {"id":"5","name":"Macarons Rosé · 12 u","category":"Confituras","price":3200,"badge":"","image":"https://images.pexels.com/photos/29068714/pexels-photo-29068714.jpeg?auto=compress&cs=tinysrgb&w=900","description":"Doce macarons delicados con rellenos de vainilla, fresa y chocolate blanco, presentados para regalar.","visible":true},
+    {"id":"6","name":"Caja mesa dulce","category":"Confituras","price":8900,"badge":"Especial","image":"https://images.pexels.com/photos/16177484/pexels-photo-16177484.jpeg?auto=compress&cs=tinysrgb&w=900","description":"Una selección especial de dulces florales y bocados rosados, organizada en cajas para compartir.","visible":true},
+    {"id":"7","name":"Bombones para regalar","category":"Confituras","price":3500,"badge":"","image":"https://images.pexels.com/photos/14275701/pexels-photo-14275701.jpeg?auto=compress&cs=tinysrgb&w=900","description":"Caja rosada con bombones gourmet y lazo satinado, lista para dedicar con un mensaje corto.","visible":true},
+    {"id":"8","name":"Bombones Rosé · 20 u","category":"Confituras","price":2900,"badge":"","image":"https://images.pexels.com/photos/7103706/pexels-photo-7103706.jpeg?auto=compress&cs=tinysrgb&w=900","description":"Veinte bombones artesanales en una paleta rosada, perfectos para completar una mesa dulce.","visible":true}
+  ]
+}

@@ -1,0 +1,60 @@
+.card-quantity {
+  position: absolute;
+  z-index: 3;
+  right: 9px;
+  bottom: 9px;
+  display: inline-grid;
+  grid-template-columns: 38px minmax(24px, auto) 38px;
+  align-items: center;
+  gap: 3px;
+  min-height: 44px;
+  padding: 3px;
+  border: 1px solid rgba(255,255,255,.72);
+  border-radius: 999px;
+  background: rgba(255,249,239,.97);
+  box-shadow: 0 8px 24px rgba(65,47,55,.2);
+  color: var(--ink);
+}
+.card-quantity button, .dialog-quantity button {
+  display: grid;
+  place-items: center;
+  min-width: 38px;
+  min-height: 38px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--ink);
+  font-size: 1.35rem;
+  line-height: 1;
+  font-weight: 600;
+  cursor: pointer;
+}
+.card-quantity button:last-child, .dialog-quantity button:last-child {
+  background: var(--rose);
+  color: white;
+}
+.card-quantity button:hover, .dialog-quantity button:hover { background: var(--rose-soft); }
+.card-quantity button:last-child:hover, .dialog-quantity button:last-child:hover { background: var(--rose-dark); }
+.card-quantity span, .dialog-quantity span {
+  min-width: 22px;
+  text-align: center;
+  font-size: .9rem;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.dialog-quantity {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 48px;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: white;
+}
+.dialog-quantity[hidden] { display: none; }
+@media (max-width: 640px) {
+  .card-quantity { right: 7px; bottom: 7px; grid-template-columns: 36px minmax(20px, auto) 36px; }
+  .card-quantity button { min-width: 36px; min-height: 36px; }
+  .dialog-quantity { align-self: stretch; justify-content: space-between; }
+}

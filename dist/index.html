@@ -21,6 +21,7 @@
       href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='10' fill='%23d96f91'/%3E%3Cpath d='M8 20h16v3H8zm2-2c0-5 2-8 6-8s6 3 6 8z' fill='%23fff9ef'/%3E%3Ccircle cx='16' cy='8' r='2' fill='%23b9dce7'/%3E%3C/svg%3E"
     />
     <link rel="stylesheet" href="./styles.css" />
+    <link rel="stylesheet" href="./catalog-extra.css" />
   </head>
   <body>
     <a class="skip-link" href="#catalogo">Saltar al catálogo</a>
@@ -185,6 +186,11 @@
         <div class="dialog-action">
           <strong data-dialog-price></strong>
           <button class="add-button" type="button" data-dialog-add>Agregar al pedido</button>
+          <div class="dialog-quantity" data-dialog-quantity hidden aria-label="Cantidad de este producto en tu pedido">
+            <button type="button" data-dialog-decrease aria-label="Restar uno">−</button>
+            <span data-dialog-count aria-live="polite">0</span>
+            <button type="button" data-dialog-increase aria-label="Agregar uno">+</button>
+          </div>
         </div>
       </div>
     </dialog>
@@ -197,6 +203,6 @@
       <button type="button" data-open-cart><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 4h2l2 10h11l2-7H7M9 20h.01M18 20h.01" /></svg><span>Pedido</span><b data-cart-count>0</b></button>
     </nav>
 
-    <script src="./app.js"></script>
+    <script src="./catalog-app.js"></script>
   </body>
 </html>

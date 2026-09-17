@@ -1,0 +1,301 @@
+const WHATSAPP_NUMBER = "";
+const state = { products: [], categories: ["Todos"], category: "Todos", search: "", cart: readCart(), activeProduct: null };
+const grid = document.querySelector("#product-grid");
+const categoryList = document.querySelector("#category-list");
+const searchInput = document.querySelector("#search");
+const emptyState = document.querySelector("#empty-state");
+const resultCount = document.querySelector("[data-result-count]");
+const drawerLayer = document.querySelector("[data-drawer-layer]");
+const cartItems = document.querySelector("[data-cart-items]");
+const cartEmpty = document.querySelector("[data-cart-empty]");
+const cartSummary = document.querySelector("[data-cart-summary]");
+const cartTotal = document.querySelector("[data-cart-total]");
+const productDialog = document.querySelector("#product-dialog");
+const toast = document.querySelector("[data-toast]");
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
+}
+
+function formatPrice(value) {
+  return new Intl.NumberFormat("es-CU", { maximumFractionDigits: 0 }).format(value);
+}
+
+function readCart() {
+  try {
+    const saved = JSON.parse(localStorage.getItem("labiucakes-cart"));
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
+    return Object.fromEntries(Object.entries(saved).filter(([id, quantity]) => /^[\w-]+$/.test(id) && Number.isInteger(quantity) && quantity > 0));
+  } catch { return {}; }
+}
+
+function saveCart() {
+  localStorage.setItem("labiucakes-cart", JSON.stringify(state.cart));
+}
+
+function visibleProducts() {
+  const query = state.search.trim().toLocaleLowerCase("es");
+  return state.products.filter((product) => {
+    const haystack = (product.name + " " + product.category + " " + product.description).toLocaleLowerCase("es");
+    return product.visible !== false && (state.category === "Todos" || product.category === state.category) && (!query || haystack.includes(query));
+  });
+}
+
+function renderCategories() {
+  categoryList.innerHTML = state.categories.map((category) =>
+    '<button class="category-chip ' + (state.category === category ? 'active' : '') +
+    '" type="button" data-category="' + escapeHtml(category) +
+    '" aria-pressed="' + (state.category === category) + '">' + escapeHtml(category) + '</button>'
+  ).join("");
+}
+
+function renderProducts() {
+  const filtered = visibleProducts();
+  resultCount.textContent = filtered.length;
+  emptyState.hidden = filtered.length !== 0;
+  grid.hidden = filtered.length === 0;
+  grid.innerHTML = filtered.map((product, index) => {
+    const id = escapeHtml(product.id);
+    const name = escapeHtml(product.name);
+    const quantity = state.cart[product.id] || 0;
+    const controls = quantity
+      ? '<div class="card-quantity" aria-label="' + quantity + ' de ' + name + ' en tu pedido">' +
+        '<button type="button" data-card-decrease="' + id + '" aria-label="Restar uno de ' + name + '">−</button>' +
+        '<span aria-live="polite">' + quantity + '</span>' +
+        '<button type="button" data-card-increase="' + id + '" aria-label="Agregar uno de ' + name + '">+</button></div>'
+      : '<button class="quick-add" type="button" data-card-increase="' + id + '" aria-label="Agregar ' + name + ' al pedido">' +
+        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>';
+    return '<article class="product-card" style="animation-delay:' + Math.min(index * 55, 280) + 'ms">' +
+      '<div class="product-media" data-product="' + id + '" role="button" tabindex="0" aria-label="Ver ' + name + '">' +
+      '<img src="' + escapeHtml(product.image) + '" alt="' + name + '" loading="' + (index > 3 ? 'lazy' : 'eager') + '" />' +
+      (product.badge ? '<span class="product-badge">' + escapeHtml(product.badge) + '</span>' : '') + controls +
+      '</div><div class="product-info"><p class="product-category">' + escapeHtml(product.category) + '</p>' +
+      '<h3>' + name + '</h3><div class="product-bottom"><span class="product-price">$' + formatPrice(product.price) +
+      ' CUP</span><button class="detail-link" type="button" data-product="' + id + '">Ver detalles</button></div></div></article>';
+  }).join("");
+}
+
+function cartEntries() {
+  return Object.entries(state.cart)
+    .map(([id, quantity]) => ({ product: state.products.find((item) => item.id === id), quantity }))
+    .filter((entry) => entry.product && entry.product.visible !== false && entry.quantity > 0);
+}
+
+function renderDialogControls() {
+  if (!state.activeProduct) return;
+  const quantity = state.cart[state.activeProduct.id] || 0;
+  const controls = productDialog.querySelector("[data-dialog-quantity]");
+  controls.hidden = quantity === 0;
+  productDialog.querySelector("[data-dialog-add]").hidden = quantity > 0;
+  controls.querySelector("[data-dialog-count]").textContent = quantity;
+}
+
+function renderCart() {
+  const entries = cartEntries();
+  const count = entries.reduce((sum, entry) => sum + entry.quantity, 0);
+  const total = entries.reduce((sum, entry) => sum + entry.product.price * entry.quantity, 0);
+  document.querySelectorAll("[data-cart-count]").forEach((element) => { element.textContent = count; });
+  cartEmpty.hidden = entries.length > 0;
+  cartSummary.hidden = entries.length === 0;
+  cartTotal.textContent = "$" + formatPrice(total) + " CUP";
+  cartItems.innerHTML = entries.map(({ product, quantity }) => {
+    const id = escapeHtml(product.id);
+    const name = escapeHtml(product.name);
+    return '<article class="cart-item"><img src="' + escapeHtml(product.image) + '" alt="" />' +
+      '<div><h3>' + name + '</h3><p>$' + formatPrice(product.price) + ' CUP</p>' +
+      '<div class="quantity" aria-label="Cantidad de ' + name + '">' +
+      '<button type="button" data-decrease="' + id + '" aria-label="Restar uno">−</button>' +
+      '<span>' + quantity + '</span><button type="button" data-increase="' + id + '" aria-label="Agregar uno">+</button>' +
+      '</div></div><button class="remove-item" type="button" data-remove="' + id + '" aria-label="Eliminar ' + name + '">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg></button></article>';
+  }).join("");
+  saveCart();
+  renderProducts();
+  renderDialogControls();
+}
+
+function updateQuantity(id, delta) {
+  if (!state.products.some((product) => product.id === id && product.visible !== false)) return;
+  const next = (state.cart[id] || 0) + delta;
+  if (next <= 0) delete state.cart[id];
+  else state.cart[id] = next;
+  renderCart();
+}
+
+function openCart() {
+  drawerLayer.hidden = false;
+  document.body.classList.add("no-scroll");
+  requestAnimationFrame(() => drawerLayer.querySelector("[data-close-cart]").focus());
+}
+
+function closeCart() {
+  drawerLayer.hidden = true;
+  document.body.classList.remove("no-scroll");
+}
+
+function openProduct(id) {
+  const product = state.products.find((item) => item.id === id);
+  if (!product) return;
+  state.activeProduct = product;
+  productDialog.querySelector("[data-dialog-image]").src = product.image;
+  productDialog.querySelector("[data-dialog-image]").alt = product.name;
+  productDialog.querySelector("[data-dialog-category]").textContent = product.category;
+  productDialog.querySelector("[data-dialog-name]").textContent = product.name;
+  productDialog.querySelector("[data-dialog-description]").textContent = product.description;
+  productDialog.querySelector("[data-dialog-price]").textContent = "$" + formatPrice(product.price) + " CUP";
+  renderDialogControls();
+  productDialog.showModal();
+}
+
+function closeProduct() {
+  productDialog.close();
+  state.activeProduct = null;
+}
+
+let toastTimer;
+function showToast(message) {
+  clearTimeout(toastTimer);
+  toast.textContent = message;
+  toast.classList.add("show");
+  toastTimer = setTimeout(() => toast.classList.remove("show"), 2200);
+}
+
+function checkout() {
+  const entries = cartEntries();
+  if (!entries.length) return;
+  const note = document.querySelector("#order-note").value.trim();
+  const lines = entries.map(({ product, quantity }) => "• " + quantity + " × " + product.name + " — $" + formatPrice(product.price * quantity) + " CUP");
+  const total = entries.reduce((sum, entry) => sum + entry.product.price * entry.quantity, 0);
+  const message = ["Hola, LaBiuCakes. Quisiera consultar este pedido:", "", ...lines, "",
+    "Total estimado: $" + formatPrice(total) + " CUP", note ? "Nota: " + note : ""].filter(Boolean).join("\n");
+  if (!WHATSAPP_NUMBER) {
+    navigator.clipboard?.writeText(message);
+    showToast("Pedido preparado · falta conectar el WhatsApp real");
+    return;
+  }
+  window.open("https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message), "_blank", "noopener,noreferrer");
+}
+
+function setupModelContextTools() {
+  const context = document.modelContext;
+  if (!context?.registerTool) return;
+  const register = (definition) => {
+    try { Promise.resolve(context.registerTool(definition)).catch(() => {}); } catch { /* Optional browser capability. */ }
+  };
+  register({
+    name: "read_catalog",
+    title: "Consultar catálogo",
+    description: "Devuelve los productos disponibles de LaBiuCakes.",
+    inputSchema: { type: "object", properties: { query: { type: "string", maxLength: 80 }, category: { type: "string" } }, additionalProperties: false },
+    annotations: { readOnlyHint: true, untrustedContentHint: false },
+    execute(input = {}) {
+      if (!input || typeof input !== "object" || Array.isArray(input)) throw new Error("Consulta no válida.");
+      if (input.category !== undefined && !state.categories.includes(input.category)) throw new Error("Categoría no válida.");
+      const query = String(input.query || "").trim().toLocaleLowerCase("es");
+      return state.products.filter((product) => product.visible !== false &&
+        (!input.category || input.category === "Todos" || product.category === input.category) &&
+        (!query || (product.name + " " + product.description).toLocaleLowerCase("es").includes(query)))
+        .map(({ id, name, category, price }) => ({ id, name, category, price, currency: "CUP" }));
+    }
+  });
+  register({
+    name: "add_items_to_order",
+    title: "Agregar al pedido",
+    description: "Agrega productos del catálogo al pedido visible.",
+    inputSchema: { type: "object", properties: { items: { type: "array", minItems: 1, maxItems: 20,
+      items: { type: "object", properties: { productId: { type: "string" }, quantity: { type: "integer", minimum: 1, maximum: 12 } },
+        required: ["productId", "quantity"], additionalProperties: false } } }, required: ["items"], additionalProperties: false },
+    annotations: { readOnlyHint: false, untrustedContentHint: false },
+    execute(input) {
+      if (!input || !Array.isArray(input.items) || input.items.length < 1 || input.items.length > 20) throw new Error("Incluye entre 1 y 20 productos.");
+      const checked = input.items.map((item) => {
+        const product = state.products.find((candidate) => candidate.id === String(item?.productId) && candidate.visible !== false);
+        if (!product || !Number.isInteger(item.quantity) || item.quantity < 1 || item.quantity > 12) throw new Error("Producto o cantidad no válida.");
+        return { product, quantity: item.quantity };
+      });
+      checked.forEach(({ product, quantity }) => { state.cart[product.id] = (state.cart[product.id] || 0) + quantity; });
+      renderCart();
+      return { status: "added", itemCount: cartEntries().reduce((sum, entry) => sum + entry.quantity, 0) };
+    }
+  });
+}
+
+categoryList.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-category]");
+  if (!button) return;
+  state.category = button.dataset.category;
+  renderCategories();
+  renderProducts();
+});
+searchInput.addEventListener("input", (event) => { state.search = event.target.value; renderProducts(); });
+grid.addEventListener("click", (event) => {
+  const increase = event.target.closest("[data-card-increase]");
+  const decrease = event.target.closest("[data-card-decrease]");
+  if (increase || decrease) {
+    event.stopPropagation();
+    updateQuantity(increase ? increase.dataset.cardIncrease : decrease.dataset.cardDecrease, increase ? 1 : -1);
+    return;
+  }
+  const target = event.target.closest("[data-product]");
+  if (target) openProduct(target.dataset.product);
+});
+grid.addEventListener("keydown", (event) => {
+  if ((event.key === "Enter" || event.key === " ") && event.target.matches(".product-media")) {
+    event.preventDefault();
+    openProduct(event.target.dataset.product);
+  }
+});
+document.addEventListener("click", (event) => {
+  if (event.target.closest("[data-open-cart]")) openCart();
+  if (event.target.closest("[data-close-cart]")) closeCart();
+  if (event.target.closest("[data-close-dialog]")) closeProduct();
+  const increase = event.target.closest("[data-increase]");
+  const decrease = event.target.closest("[data-decrease]");
+  const remove = event.target.closest("[data-remove]");
+  if (increase) updateQuantity(increase.dataset.increase, 1);
+  if (decrease) updateQuantity(decrease.dataset.decrease, -1);
+  if (remove) { delete state.cart[remove.dataset.remove]; renderCart(); }
+  if (event.target.closest("[data-clear-filters]")) {
+    state.category = "Todos"; state.search = ""; searchInput.value = ""; renderCategories(); renderProducts();
+  }
+  if (event.target.closest("[data-dialog-add]") && state.activeProduct) updateQuantity(state.activeProduct.id, 1);
+  if (event.target.closest("[data-dialog-increase]") && state.activeProduct) updateQuantity(state.activeProduct.id, 1);
+  if (event.target.closest("[data-dialog-decrease]") && state.activeProduct) updateQuantity(state.activeProduct.id, -1);
+  if (event.target.closest("[data-checkout]")) checkout();
+});
+productDialog.addEventListener("click", (event) => {
+  const rect = productDialog.getBoundingClientRect();
+  if (event.clientX < rect.left || event.clientX > rect.right || event.clientY < rect.top || event.clientY > rect.bottom) closeProduct();
+});
+productDialog.addEventListener("close", () => { state.activeProduct = null; });
+document.addEventListener("keydown", (event) => { if (event.key === "Escape" && !drawerLayer.hidden) closeCart(); });
+
+async function loadCatalog() {
+  let catalog;
+  try {
+    const response = await fetch("/api/catalog", { cache: "no-store" });
+    if (!response.ok) throw new Error("API no disponible");
+    catalog = (await response.json()).catalog;
+  } catch {
+    try {
+      const response = await fetch("./catalog.json", { cache: "no-store" });
+      if (!response.ok) throw new Error("JSON no disponible");
+      catalog = await response.json();
+    } catch {
+      emptyState.querySelector("h3").textContent = "No se pudo cargar el catálogo";
+      emptyState.querySelector("p").textContent = "Inténtalo de nuevo en unos minutos.";
+      emptyState.querySelector("button").hidden = true;
+      emptyState.hidden = false;
+      return;
+    }
+  }
+  state.products = catalog.products.map((product) => ({ ...product, id: String(product.id) }));
+  for (const id of Object.keys(state.cart)) {
+    if (!state.products.some((product) => product.id === id && product.visible !== false)) delete state.cart[id];
+  }
+  state.categories = ["Todos", ...catalog.categories];
+  renderCategories();
+  renderCart();
+  setupModelContextTools();
+}
+loadCatalog();
