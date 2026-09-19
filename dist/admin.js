@@ -4,6 +4,7 @@ const admin = {
   sha: null,
   editorId: null,
   renamingCategory: null,
+  rate: { usdCup: 710, source: "reference", observedAt: "2026-09-19", stale: true },
   busy: false
 };
 
@@ -27,6 +28,32 @@ function escapeHtml(value) {
 
 function formatPrice(value) {
   return new Intl.NumberFormat("es-CU", { maximumFractionDigits: 0 }).format(value);
+}
+
+function formatUsd(value) {
+  return "$" + new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + " USD";
+}
+
+function formatCup(usd) {
+  return "≈ $" + formatPrice(Math.round(usd * admin.rate.usdCup)) + " CUP";
+}
+
+function renderRatePreview() {
+  const usd = Number(productForm.elements.priceUsd.value) || 0;
+  document.querySelector("#price-cup-preview").textContent = formatCup(usd);
+  const rate = admin.rate;
+  document.querySelector("#admin-rate-note").textContent = rate.source === "eltoque"
+    ? (rate.stale ? "Última tasa consultada de elTOQUE" : "Tasa consultada de elTOQUE") + ": 1 USD = " + formatPrice(rate.usdCup) + " CUP"
+    : "Referencia manual del 19 sep 2026: 1 USD = " + formatPrice(rate.usdCup) + " CUP; sin actualización automática";
+}
+
+async function loadRate() {
+  try {
+    const rate = await requestJson("/api/exchange-rate");
+    if (Number.isFinite(rate.usdCup) && rate.usdCup > 0) admin.rate = rate;
+  } catch { /* La referencia fechada sigue disponible si la API falla. */ }
+  renderRatePreview();
+  if (admin.catalog) renderProducts();
 }
 
 async function requestJson(url, options = {}) {
@@ -64,6 +91,7 @@ async function loadCatalog() {
   admin.catalog = result.catalog;
   admin.sha = result.sha;
   renderAll();
+  await loadRate();
   if (!result.configured) showMessage("Vista previa: configura GITHUB_TOKEN en Vercel para poder guardar cambios.");
 }
 
@@ -82,7 +110,7 @@ function renderProducts() {
     '<article class="admin-product">' +
     '<img src="' + escapeHtml(product.image) + '" alt="" loading="lazy" />' +
     '<div class="admin-product-name"><strong>' + escapeHtml(product.name) + '</strong><small>' + escapeHtml(product.category) + '</small></div>' +
-    '<span class="admin-product-price">$' + formatPrice(product.price) + ' CUP</span>' +
+    '<span class="admin-product-price">' + formatUsd(product.priceUsd) + '<small>' + formatCup(product.priceUsd) + '</small></span>' +
     '<span class="status-pill ' + (product.visible === false ? 'is-hidden' : '') + '">' + (product.visible === false ? 'Oculto' : 'Visible') + '</span>' +
     '<div class="row-actions"><button type="button" data-edit="' + escapeHtml(product.id) + '" aria-label="Editar ' + escapeHtml(product.name) + '">Editar</button>' +
     '<button class="danger" type="button" data-delete="' + escapeHtml(product.id) + '" aria-label="Eliminar ' + escapeHtml(product.name) + '">×</button></div></article>'
@@ -139,7 +167,7 @@ function openEditor(id = null) {
   if (product) {
     productForm.elements.name.value = product.name;
     productForm.elements.category.value = product.category;
-    productForm.elements.price.value = product.price;
+    productForm.elements.priceUsd.value = product.priceUsd;
     productForm.elements.description.value = product.description;
     productForm.elements.badge.value = product.badge;
     productForm.elements.image.value = product.image;
@@ -149,6 +177,7 @@ function openEditor(id = null) {
     if (admin.catalog.categories.length === 1) productForm.elements.category.value = admin.catalog.categories[0];
   }
   previewImage(product?.image || "");
+  renderRatePreview();
   document.querySelector("#editor-heading").textContent = product ? "Editar producto" : "Nuevo producto";
   productsView.hidden = true;
   categoriesView.hidden = true;
@@ -227,6 +256,7 @@ productList.addEventListener("click", async (event) => {
 });
 
 productImage.addEventListener("input", () => previewImage(productImage.value.trim()));
+productForm.elements.priceUsd.addEventListener("input", renderRatePreview);
 document.querySelector("#product-file").addEventListener("change", async (event) => {
   const file = event.target.files?.[0];
   if (!file) return;
@@ -263,7 +293,7 @@ productForm.addEventListener("submit", async (event) => {
     id: admin.editorId || crypto.randomUUID(),
     name: fields.name.value.trim(),
     category: fields.category.value,
-    price: Number(fields.price.value),
+    priceUsd: Number(fields.priceUsd.value),
     description: fields.description.value.trim(),
     badge: fields.badge.value.trim(),
     image,
@@ -347,3 +377,4 @@ async function initialize() {
   }
 }
 initialize();
+setInterval(loadRate, 10 * 60 * 1000);

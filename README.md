@@ -1,6 +1,6 @@
 # LaBiuCakes · catálogo y Cakeadmin
 
-Catálogo estático de repostería con carrito. El panel de administración está en /cakeadmin.
+Catálogo estático de repostería con carrito. El panel de administración está en /cakeadmin. Los precios base se guardan en USD; el equivalente en CUP se calcula al mostrar cada página.
 
 ## Arquitectura
 
@@ -8,6 +8,7 @@ Catálogo estático de repostería con carrito. El panel de administración est�
 - Panel: funciones de Vercel en api/; guardan el JSON en GitHub con control de versión para no sobrescribir otra edición.
 - Fotografías: Cloudinary; solo se guarda su URL HTTPS en el JSON.
 - Acceso: usuarios fijos michel y zahira, contraseñas y firma de sesión exclusivamente en variables privadas del servidor.
+- Monedas: el catálogo guarda `priceUsd` por producto. `api/exchange-rate.mjs` consulta la API oficial de elTOQUE desde el servidor con `ELTOQUE_API_TOKEN`; nunca se expone el token al navegador. La respuesta se cachea 10 minutos. USD es el precio base y CUP se redondea al peso más cercano.
 
 No se usa base de datos. El catálogo público consulta la API para ver los cambios recientes y usa el JSON estático si la API no está disponible.
 
@@ -18,6 +19,9 @@ No se usa base de datos. El catálogo público consulta la API para ver los camb
 3. Crea un token fine-grained de GitHub limitado a este repositorio, con permiso Contents: Read and write. Ponlo como GITHUB_TOKEN. GITHUB_REPOSITORY debe apuntar al mismo repositorio que despliega Vercel.
 4. Crea una cuenta de Cloudinary y copia Cloud name, API key y API secret. La subida usa una firma generada en el servidor; no requiere un preset público.
 5. Genera CAKEADMIN_SESSION_SECRET con al menos 32 caracteres aleatorios. Vuelve a desplegar tras configurar las variables.
+6. Para actualizar CUP con elTOQUE, solicita una clave en [su formulario oficial](https://tasas-token.eltoque.com/). Registra LaBiuCakes como aplicación, usa el dominio público de Vercel como URL y selecciona «Servidor» como origen de las peticiones. Una vez que la recibas por correo, agrega `ELTOQUE_API_TOKEN` en las variables privadas de Vercel y vuelve a desplegar. No compartas el token por chat ni lo subas a GitHub.
+
+Sin token o si elTOQUE no responde, la interfaz indica que usa una referencia manual del 19 de septiembre de 2026: 1 USD = 710 CUP. No presenta esa referencia como tasa en vivo. La API oficial aún necesita probarse con un token real porque su documentación no especifica el formato de la respuesta exitosa.
 
 Las contraseñas numéricas iniciales fueron compartidas en el chat. Conviene cambiarlas por otras largas antes de poner el panel en producción. Si cambias una contraseña, cambia también CAKEADMIN_SESSION_SECRET para cerrar sesiones anteriores.
 

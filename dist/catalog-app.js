@@ -1,5 +1,6 @@
 const WHATSAPP_NUMBER = "5352001457";
-const state = { products: [], categories: ["Todos"], category: "Todos", search: "", cart: readCart(), activeProduct: null };
+const state = { products: [], categories: ["Todos"], category: "Todos", search: "", cart: readCart(), activeProduct: null,
+  rate: { usdCup: 710, source: "reference", observedAt: "2026-09-19", stale: true } };
 const grid = document.querySelector("#product-grid");
 const categoryList = document.querySelector("#category-list");
 const searchInput = document.querySelector("#search");
@@ -17,8 +18,56 @@ function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 }
 
-function formatPrice(value) {
+function formatNumber(value) {
   return new Intl.NumberFormat("es-CU", { maximumFractionDigits: 0 }).format(value);
+}
+
+function formatUsd(value) {
+  return "$" + new Intl.NumberFormat("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(value) + " USD";
+}
+
+function formatCup(usd) {
+  return "≈ $" + formatNumber(Math.round(usd * state.rate.usdCup)) + " CUP";
+}
+
+function priceMarkup(usd) {
+  return '<span class="price-usd">' + formatUsd(usd) + '</span><span class="price-cup">' + formatCup(usd) + '</span>';
+}
+
+function rateLabel() {
+  const rate = state.rate;
+  if (rate.source === "eltoque") {
+    const status = rate.stale ? "Última tasa consultada de elTOQUE" : "Tasa consultada de elTOQUE";
+    const date = new Date(rate.observedAt);
+    const time = Number.isNaN(date.getTime()) ? "" : " · " + new Intl.DateTimeFormat("es-CU", { dateStyle: "short", timeStyle: "short" }).format(date);
+    return status + ": 1 USD = " + formatNumber(rate.usdCup) + " CUP" + time + (rate.stale ? " · puede estar desactualizada" : "");
+  }
+  return "Referencia manual del 19 sep 2026: 1 USD = " + formatNumber(rate.usdCup) + " CUP · sin actualización automática";
+}
+
+function renderRate() {
+  document.querySelectorAll("[data-rate-label]").forEach((element) => { element.textContent = rateLabel(); });
+  document.querySelectorAll("[data-price-usd]").forEach((element) => {
+    const cup = element.querySelector(".price-cup");
+    if (cup) cup.textContent = formatCup(Number(element.dataset.priceUsd));
+  });
+  const featured = state.products.find((product) => product.id === "1") || state.products[0];
+  if (featured) document.querySelector("[data-hero-price]").textContent = "Desde " + formatUsd(featured.priceUsd) + " · " + formatCup(featured.priceUsd);
+  renderCart();
+  if (state.activeProduct) productDialog.querySelector("[data-dialog-price]").innerHTML = priceMarkup(state.activeProduct.priceUsd);
+}
+
+async function loadRate() {
+  try {
+    const response = await fetch("/api/exchange-rate", { cache: "no-store" });
+    if (!response.ok) throw new Error("Tasa no disponible");
+    const rate = await response.json();
+    if (!Number.isFinite(rate.usdCup) || rate.usdCup <= 0 || !["reference", "eltoque"].includes(rate.source)) throw new Error("Tasa no válida");
+    state.rate = rate;
+  } catch {
+    if (state.rate.source === "eltoque") state.rate = { ...state.rate, stale: true };
+  }
+  renderRate();
 }
 
 function readCart() {
@@ -75,8 +124,8 @@ function renderProducts() {
       '<img src="' + escapeHtml(product.image) + '" alt="' + name + '" loading="' + (index > 3 ? 'lazy' : 'eager') + '" />' +
       (product.badge ? '<span class="product-badge">' + escapeHtml(product.badge) + '</span>' : '') + cardControls(product) +
       '</div><div class="product-info"><p class="product-category">' + escapeHtml(product.category) + '</p>' +
-      '<h3>' + name + '</h3><div class="product-bottom"><span class="product-price">$' + formatPrice(product.price) +
-      ' CUP</span><button class="detail-link" type="button" data-product="' + id + '">Ver detalles</button></div></div></article>';
+      '<h3>' + name + '</h3><div class="product-bottom"><span class="product-price" data-price-usd="' + product.priceUsd + '">' + priceMarkup(product.priceUsd) +
+      '</span><button class="detail-link" type="button" data-product="' + id + '">Ver detalles</button></div></div></article>';
   }).join("");
 }
 
@@ -117,16 +166,16 @@ function renderDialogControls() {
 function renderCart() {
   const entries = cartEntries();
   const count = entries.reduce((sum, entry) => sum + entry.quantity, 0);
-  const total = entries.reduce((sum, entry) => sum + entry.product.price * entry.quantity, 0);
+  const totalCents = entries.reduce((sum, entry) => sum + Math.round(entry.product.priceUsd * 100) * entry.quantity, 0);
   document.querySelectorAll("[data-cart-count]").forEach((element) => { element.textContent = count; });
   cartEmpty.hidden = entries.length > 0;
   cartSummary.hidden = entries.length === 0;
-  cartTotal.textContent = "$" + formatPrice(total) + " CUP";
+  cartTotal.innerHTML = priceMarkup(totalCents / 100);
   cartItems.innerHTML = entries.map(({ product, quantity }) => {
     const id = escapeHtml(product.id);
     const name = escapeHtml(product.name);
     return '<article class="cart-item"><img src="' + escapeHtml(product.image) + '" alt="" />' +
-      '<div><h3>' + name + '</h3><p>$' + formatPrice(product.price) + ' CUP</p>' +
+      '<div><h3>' + name + '</h3><p class="cart-item-price" data-price-usd="' + product.priceUsd + '">' + priceMarkup(product.priceUsd) + '</p>' +
       '<div class="quantity" aria-label="Cantidad de ' + name + '">' +
       '<button type="button" data-decrease="' + id + '" aria-label="Restar uno">−</button>' +
       '<span>' + quantity + '</span><button type="button" data-increase="' + id + '" aria-label="Agregar uno">+</button>' +
@@ -166,7 +215,7 @@ function openProduct(id) {
   productDialog.querySelector("[data-dialog-category]").textContent = product.category;
   productDialog.querySelector("[data-dialog-name]").textContent = product.name;
   productDialog.querySelector("[data-dialog-description]").textContent = product.description;
-  productDialog.querySelector("[data-dialog-price]").textContent = "$" + formatPrice(product.price) + " CUP";
+  productDialog.querySelector("[data-dialog-price]").innerHTML = priceMarkup(product.priceUsd);
   renderDialogControls();
   productDialog.showModal();
 }
@@ -188,10 +237,14 @@ function checkout() {
   const entries = cartEntries();
   if (!entries.length) return;
   const note = document.querySelector("#order-note").value.trim();
-  const lines = entries.map(({ product, quantity }) => "• " + quantity + " × " + product.name + " — $" + formatPrice(product.price * quantity) + " CUP");
-  const total = entries.reduce((sum, entry) => sum + entry.product.price * entry.quantity, 0);
+  const lines = entries.map(({ product, quantity }) => {
+    const subtotal = Math.round(product.priceUsd * 100) * quantity / 100;
+    return "• " + quantity + " × " + product.name + " — " + formatUsd(subtotal) + " (" + formatCup(subtotal) + ")";
+  });
+  const total = entries.reduce((sum, entry) => sum + Math.round(entry.product.priceUsd * 100) * entry.quantity, 0) / 100;
   const message = ["Hola, LaBiuCakes. Quisiera consultar este pedido:", "", ...lines, "",
-    "Total estimado: $" + formatPrice(total) + " CUP", note ? "Nota: " + note : ""].filter(Boolean).join("\n");
+    "Total estimado: " + formatUsd(total) + " (" + formatCup(total) + ")", rateLabel(),
+    note ? "Nota: " + note : ""].filter(Boolean).join("\n");
   if (!WHATSAPP_NUMBER) {
     navigator.clipboard?.writeText(message);
     showToast("Pedido preparado · falta conectar el WhatsApp real");
@@ -219,7 +272,7 @@ function setupModelContextTools() {
       return state.products.filter((product) => product.visible !== false &&
         (!input.category || input.category === "Todos" || product.category === input.category) &&
         (!query || (product.name + " " + product.description).toLocaleLowerCase("es").includes(query)))
-        .map(({ id, name, category, price }) => ({ id, name, category, price, currency: "CUP" }));
+        .map(({ id, name, category, priceUsd }) => ({ id, name, category, priceUsd, currency: "USD", approximateCup: Math.round(priceUsd * state.rate.usdCup), rate: state.rate }));
     }
   });
   register({
@@ -313,7 +366,8 @@ async function loadCatalog() {
       return;
     }
   }
-  state.products = catalog.products.map((product) => ({ ...product, id: String(product.id) }));
+  state.products = catalog.products.map((product) => ({ ...product, id: String(product.id),
+    priceUsd: catalog.version === 1 ? Math.round(product.price / 710 * 100) / 100 : product.priceUsd }));
   for (const id of Object.keys(state.cart)) {
     if (!state.products.some((product) => product.id === id && product.visible !== false)) delete state.cart[id];
   }
@@ -322,5 +376,7 @@ async function loadCatalog() {
   renderProducts();
   renderCart();
   setupModelContextTools();
+  await loadRate();
 }
 loadCatalog();
+setInterval(loadRate, 10 * 60 * 1000);

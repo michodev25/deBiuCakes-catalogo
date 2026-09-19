@@ -38,6 +38,25 @@ test('the initial JSON and category links are valid', () => {
   const result = validateCatalog(seed);
   assert.equal(result.products.length, 8);
   assert.equal(result.categories.length, 4);
+  assert.equal(result.version, 2);
+  assert.equal(result.currency, 'USD');
+  assert.equal(result.products[0].priceUsd, 10.99);
+});
+
+test('legacy CUP prices are migrated once, and new USD prices require cents', () => {
+  const legacy = structuredClone(seed);
+  legacy.version = 1;
+  delete legacy.currency;
+  legacy.products[0].price = 7800;
+  delete legacy.products[0].priceUsd;
+  for (const product of legacy.products.slice(1)) {
+    product.price = Math.round(product.priceUsd * 710);
+    delete product.priceUsd;
+  }
+  assert.equal(validateCatalog(legacy).products[0].priceUsd, 10.99);
+  const invalid = structuredClone(seed);
+  invalid.products[0].priceUsd = 10.999;
+  assert.throws(() => validateCatalog(invalid), /precio USD/);
 });
 
 test('catalog validation rejects duplicated categories and unsafe image URLs', () => {

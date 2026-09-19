@@ -53,6 +53,16 @@
   background: white;
 }
 .dialog-quantity[hidden] { display: none; }
+.rate-note { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 12px; margin: -13px 0 24px; color: var(--muted); font-size: .72rem; line-height: 1.5; }
+.rate-note a { color: var(--rose-dark); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
+.product-price, .cart-item-price, [data-cart-total], [data-dialog-price] { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }
+.product-price .price-usd, .cart-item-price .price-usd, [data-cart-total] .price-usd, [data-dialog-price] .price-usd { color: var(--ink); font-weight: 800; white-space: nowrap; }
+.product-price .price-cup, .cart-item-price .price-cup, [data-cart-total] .price-cup, [data-dialog-price] .price-cup { color: var(--muted); font-size: .75em; font-weight: 600; white-space: nowrap; }
+.cart-item-price { margin-bottom: 10px !important; }
+.cart-rate-note { margin: -7px 0 14px; color: var(--muted); font-size: .7rem; line-height: 1.45; }
+.total-row [data-cart-total] { align-items: flex-end; text-align: right; }
+.total-row [data-cart-total] .price-usd { font-size: 1.45rem; }
+.total-row [data-cart-total] .price-cup { font-family: "Manrope", sans-serif; font-size: .82rem; }
 @media (max-width: 640px) {
   .card-quantity { right: 7px; bottom: 7px; grid-template-columns: 36px minmax(20px, auto) 36px; }
   .card-quantity button { min-width: 36px; min-height: 36px; }

@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import session from '../api/session.mjs';
 import catalog from '../api/catalog.mjs';
 import uploadSignature from '../api/upload-signature.mjs';
+import exchangeRate from '../api/exchange-rate.mjs';
 
 const host = '127.0.0.1';
 const port = Number(process.env.PORT || 4173);
@@ -12,7 +13,8 @@ const directory = resolve(fileURLToPath(new URL('../dist/', import.meta.url)));
 const functions = {
   '/api/session': session,
   '/api/catalog': catalog,
-  '/api/upload-signature': uploadSignature
+  '/api/upload-signature': uploadSignature,
+  '/api/exchange-rate': exchangeRate
 };
 const mime = {
   '.html': 'text/html; charset=utf-8',

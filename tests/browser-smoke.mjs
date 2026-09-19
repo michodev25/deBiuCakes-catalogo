@@ -50,8 +50,13 @@ try {
   await evaluate('localStorage.removeItem("labiucakes-cart"); location.reload()');
   await waitFor('document.querySelectorAll(".product-card").length === 8');
   assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, 'La página no debe desbordarse horizontalmente.');
+  assert.equal(await evaluate('document.querySelectorAll(".product-card .price-usd").length'), 8);
+  assert.equal(await evaluate('document.querySelectorAll(".product-card .price-cup").length'), 8);
+  assert.match(await evaluate('document.querySelector("[data-rate-label]").textContent'), /referencia manual|Tasa consultada de elTOQUE/i);
+  await evaluate('window.__firstCard = document.querySelector(".product-card")');
   await evaluate('document.querySelector("[data-card-increase]").click()');
   await waitFor('document.querySelector(".card-quantity span")?.textContent === "1"');
+  assert.equal(await evaluate('document.querySelector(".product-card") === window.__firstCard'), true, 'Agregar al carrito no debe reconstruir la cuadrícula.');
   assert.equal(await evaluate('document.querySelector("[data-cart-count]").textContent'), '1');
   await evaluate('document.querySelector("[data-card-increase]").click()');
   await waitFor('document.querySelector(".card-quantity span")?.textContent === "2"');
@@ -62,13 +67,17 @@ try {
   await evaluate('document.querySelector(".mobile-nav [data-open-cart]").click()');
   await waitFor('document.querySelector("[data-drawer-layer]").hidden === false');
   assert.equal(await evaluate('document.querySelectorAll(".cart-item img").length'), 1);
+  assert.match(await evaluate('document.querySelector("[data-cart-total]").textContent'), /10\.99 USD/);
+  assert.match(await evaluate('document.querySelector("[data-cart-total]").textContent'), /CUP/);
+  assert.equal(await evaluate('document.querySelector(".cart-item img").getBoundingClientRect().width > 0'), true, 'La imagen del pedido debe ser visible en móvil.');
   await evaluate('document.querySelector("[data-close-cart]").click()');
   await send('Page.navigate', { url: site + '/cakeadmin' });
   await waitFor('document.querySelector("#login-form") !== null');
   assert.equal(await evaluate('document.querySelector("#login-view").hidden'), false);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, 'El panel móvil no debe desbordarse horizontalmente.');
-  if (process.env.CAKE_TEST_PASSWORD) {
-    await evaluate('document.querySelector("#username").value = "michel"; document.querySelector("#password").value = ' + JSON.stringify(process.env.CAKE_TEST_PASSWORD) + '; document.querySelector("#login-form").requestSubmit()');
+  const testPassword = process.env.CAKE_TEST_PASSWORD || process.env.CAKEADMIN_MICHEL_PASSWORD;
+  if (testPassword) {
+    await evaluate('document.querySelector("#username").value = "michel"; document.querySelector("#password").value = ' + JSON.stringify(testPassword) + '; document.querySelector("#login-form").requestSubmit()');
     await waitFor('document.querySelector("#dashboard-view").hidden === false');
     await waitFor('document.querySelectorAll(".admin-product").length === 8');
     await evaluate('document.querySelector("[data-tab=categories]").click()');
@@ -76,6 +85,9 @@ try {
     await evaluate('document.querySelector("[data-tab=products]").click(); document.querySelector("#new-product").click()');
     assert.equal(await evaluate('document.querySelector("#editor-view").hidden'), false);
     assert.equal(await evaluate('document.querySelectorAll("#product-category option").length'), 5);
+    assert.equal(await evaluate('document.querySelector("#product-price").name'), 'priceUsd');
+    await evaluate('document.querySelector("#product-price").value = "10"; document.querySelector("#product-price").dispatchEvent(new Event("input", { bubbles: true }))');
+    assert.match(await evaluate('document.querySelector("#price-cup-preview").textContent'), /CUP/);
     console.log('Browser smoke passed: catálogo móvil, cantidad, carrito, login y gestión visual.');
   } else {
     console.log('Browser smoke passed: catálogo móvil, cantidad, carrito y acceso visual a Cakeadmin.');
