@@ -1,8 +1,9 @@
 const WHATSAPP_NUMBER = "5352001457";
-const state = { products: [], categories: ["Todos"], category: "Todos", search: "", cart: readCart(), activeProduct: null,
+const state = { products: [], categories: ["Todos"], category: "Todos", search: "", cart: readCart(), currency: readCurrency(), activeProduct: null,
   rate: { usdCup: 710, source: "reference", observedAt: "2026-09-19", stale: true } };
 const grid = document.querySelector("#product-grid");
 const categoryList = document.querySelector("#category-list");
+const currencySelect = document.querySelector("#currency-select");
 const searchInput = document.querySelector("#search");
 const emptyState = document.querySelector("#empty-state");
 const resultCount = document.querySelector("[data-result-count]");
@@ -30,8 +31,14 @@ function formatCup(usd) {
   return "≈ $" + formatNumber(Math.round(usd * state.rate.usdCup)) + " CUP";
 }
 
+function formatPricePair(usd) {
+  return state.currency === "CUP" ? formatCup(usd) + " · " + formatUsd(usd) : formatUsd(usd) + " · " + formatCup(usd);
+}
+
 function priceMarkup(usd) {
-  return '<span class="price-usd">' + formatUsd(usd) + '</span><span class="price-cup">' + formatCup(usd) + '</span>';
+  const usdMarkup = '<span class="price-usd ' + (state.currency === "USD" ? 'price-primary' : 'price-secondary') + '">' + formatUsd(usd) + '</span>';
+  const cupMarkup = '<span class="price-cup ' + (state.currency === "CUP" ? 'price-primary' : 'price-secondary') + '">' + formatCup(usd) + '</span>';
+  return state.currency === "CUP" ? cupMarkup + usdMarkup : usdMarkup + cupMarkup;
 }
 
 function rateLabel() {
@@ -45,16 +52,17 @@ function rateLabel() {
   return "Referencia manual del 19 sep 2026: 1 USD = " + formatNumber(rate.usdCup) + " CUP · sin actualización automática";
 }
 
+function renderPrices() {
+  document.querySelectorAll("[data-price-usd]").forEach((element) => {
+    element.innerHTML = priceMarkup(Number(element.dataset.priceUsd));
+  });
+  const featured = state.products.find((product) => product.id === "1");
+  if (featured) document.querySelector("[data-hero-price]").textContent = "Desde " + formatPricePair(featured.priceUsd);
+}
+
 function renderRate() {
   document.querySelectorAll("[data-rate-label]").forEach((element) => { element.textContent = rateLabel(); });
-  document.querySelectorAll("[data-price-usd]").forEach((element) => {
-    const cup = element.querySelector(".price-cup");
-    if (cup) cup.textContent = formatCup(Number(element.dataset.priceUsd));
-  });
-  const featured = state.products.find((product) => product.id === "1") || state.products[0];
-  if (featured) document.querySelector("[data-hero-price]").textContent = "Desde " + formatUsd(featured.priceUsd) + " · " + formatCup(featured.priceUsd);
-  renderCart();
-  if (state.activeProduct) productDialog.querySelector("[data-dialog-price]").innerHTML = priceMarkup(state.activeProduct.priceUsd);
+  renderPrices();
 }
 
 async function loadRate() {
@@ -76,6 +84,11 @@ function readCart() {
     if (!saved || typeof saved !== "object" || Array.isArray(saved)) return {};
     return Object.fromEntries(Object.entries(saved).filter(([id, quantity]) => /^[\w-]+$/.test(id) && Number.isInteger(quantity) && quantity > 0));
   } catch { return {}; }
+}
+
+function readCurrency() {
+  try { return localStorage.getItem("labiucakes-currency") === "CUP" ? "CUP" : "USD"; }
+  catch { return "USD"; }
 }
 
 function saveCart() {
@@ -170,6 +183,7 @@ function renderCart() {
   document.querySelectorAll("[data-cart-count]").forEach((element) => { element.textContent = count; });
   cartEmpty.hidden = entries.length > 0;
   cartSummary.hidden = entries.length === 0;
+  cartTotal.dataset.priceUsd = totalCents / 100;
   cartTotal.innerHTML = priceMarkup(totalCents / 100);
   cartItems.innerHTML = entries.map(({ product, quantity }) => {
     const id = escapeHtml(product.id);
@@ -215,6 +229,7 @@ function openProduct(id) {
   productDialog.querySelector("[data-dialog-category]").textContent = product.category;
   productDialog.querySelector("[data-dialog-name]").textContent = product.name;
   productDialog.querySelector("[data-dialog-description]").textContent = product.description;
+  productDialog.querySelector("[data-dialog-price]").dataset.priceUsd = product.priceUsd;
   productDialog.querySelector("[data-dialog-price]").innerHTML = priceMarkup(product.priceUsd);
   renderDialogControls();
   productDialog.showModal();
@@ -239,11 +254,11 @@ function checkout() {
   const note = document.querySelector("#order-note").value.trim();
   const lines = entries.map(({ product, quantity }) => {
     const subtotal = Math.round(product.priceUsd * 100) * quantity / 100;
-    return "• " + quantity + " × " + product.name + " — " + formatUsd(subtotal) + " (" + formatCup(subtotal) + ")";
+    return "• " + quantity + " × " + product.name + " — " + formatPricePair(subtotal);
   });
   const total = entries.reduce((sum, entry) => sum + Math.round(entry.product.priceUsd * 100) * entry.quantity, 0) / 100;
   const message = ["Hola, LaBiuCakes. Quisiera consultar este pedido:", "", ...lines, "",
-    "Total estimado: " + formatUsd(total) + " (" + formatCup(total) + ")", rateLabel(),
+    "Total estimado: " + formatPricePair(total), rateLabel(),
     note ? "Nota: " + note : ""].filter(Boolean).join("\n");
   if (!WHATSAPP_NUMBER) {
     navigator.clipboard?.writeText(message);
@@ -303,6 +318,13 @@ categoryList.addEventListener("click", (event) => {
   state.category = button.dataset.category;
   renderCategories();
   renderProducts();
+});
+currencySelect.value = state.currency;
+currencySelect.addEventListener("change", (event) => {
+  if (!["USD", "CUP"].includes(event.target.value)) return;
+  state.currency = event.target.value;
+  try { localStorage.setItem("labiucakes-currency", state.currency); } catch { /* La selección sigue activa durante esta visita. */ }
+  renderPrices();
 });
 searchInput.addEventListener("input", (event) => { state.search = event.target.value; renderProducts(); });
 grid.addEventListener("click", (event) => {

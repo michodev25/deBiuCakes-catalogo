@@ -9,6 +9,7 @@ Catálogo estático de repostería con carrito. El panel de administración est�
 - Fotografías: Cloudinary; solo se guarda su URL HTTPS en el JSON.
 - Acceso: usuarios fijos michel y zahira, contraseñas y firma de sesión exclusivamente en variables privadas del servidor.
 - Monedas: el catálogo guarda `priceUsd` por producto. `api/exchange-rate.mjs` consulta la API oficial de elTOQUE desde el servidor con `ELTOQUE_API_TOKEN`; nunca se expone el token al navegador. La respuesta se cachea 10 minutos. USD es el precio base y CUP se redondea al peso más cercano.
+- El cliente puede elegir USD o CUP en «Ver precios en». La moneda elegida aparece primero en el catálogo y el pedido; la otra sigue visible. La preferencia se guarda solo en su navegador y no modifica los precios base ni la tasa.
 
 No se usa base de datos. El catálogo público consulta la API para ver los cambios recientes y usa el JSON estático si la API no está disponible.
 

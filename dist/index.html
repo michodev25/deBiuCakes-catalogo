@@ -103,7 +103,15 @@
           <div class="category-list" id="category-list" aria-label="Categorías"></div>
         </div>
 
-        <p class="rate-note"><span data-rate-label>Conversión referencial: 1 USD = 710 CUP · 19 sep 2026, sin actualización automática</span><a href="https://eltoque.com/tasas-de-cambio-cuba/dolar" target="_blank" rel="noopener noreferrer">Fuente: elTOQUE ↗</a></p>
+        <div class="currency-bar">
+          <label class="currency-picker" for="currency-select">Ver precios en
+            <select id="currency-select" name="currency">
+              <option value="USD">USD · dólares</option>
+              <option value="CUP">CUP · pesos</option>
+            </select>
+          </label>
+          <p class="rate-note"><span data-rate-label>Conversión referencial: 1 USD = 710 CUP · 19 sep 2026, sin actualización automática</span><a href="https://eltoque.com/tasas-de-cambio-cuba/dolar" target="_blank" rel="noopener noreferrer">Fuente: elTOQUE ↗</a></p>
+        </div>
 
         <div class="product-grid" id="product-grid" aria-live="polite"></div>
         <div class="empty-state" id="empty-state" hidden>
