@@ -49,6 +49,19 @@ function renderCategories() {
   ).join("");
 }
 
+function cardControls(product) {
+  const id = escapeHtml(product.id);
+  const name = escapeHtml(product.name);
+  const quantity = state.cart[product.id] || 0;
+  return quantity
+    ? '<div class="card-quantity" aria-label="' + quantity + ' de ' + name + ' en tu pedido">' +
+      '<button type="button" data-card-decrease="' + id + '" aria-label="Restar uno de ' + name + '">−</button>' +
+      '<span aria-live="polite">' + quantity + '</span>' +
+      '<button type="button" data-card-increase="' + id + '" aria-label="Agregar uno de ' + name + '">+</button></div>'
+    : '<button class="quick-add" type="button" data-card-increase="' + id + '" aria-label="Agregar ' + name + ' al pedido">' +
+      '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>';
+}
+
 function renderProducts() {
   const filtered = visibleProducts();
   resultCount.textContent = filtered.length;
@@ -57,22 +70,33 @@ function renderProducts() {
   grid.innerHTML = filtered.map((product, index) => {
     const id = escapeHtml(product.id);
     const name = escapeHtml(product.name);
-    const quantity = state.cart[product.id] || 0;
-    const controls = quantity
-      ? '<div class="card-quantity" aria-label="' + quantity + ' de ' + name + ' en tu pedido">' +
-        '<button type="button" data-card-decrease="' + id + '" aria-label="Restar uno de ' + name + '">−</button>' +
-        '<span aria-live="polite">' + quantity + '</span>' +
-        '<button type="button" data-card-increase="' + id + '" aria-label="Agregar uno de ' + name + '">+</button></div>'
-      : '<button class="quick-add" type="button" data-card-increase="' + id + '" aria-label="Agregar ' + name + ' al pedido">' +
-        '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg></button>';
     return '<article class="product-card" style="animation-delay:' + Math.min(index * 55, 280) + 'ms">' +
       '<div class="product-media" data-product="' + id + '" role="button" tabindex="0" aria-label="Ver ' + name + '">' +
       '<img src="' + escapeHtml(product.image) + '" alt="' + name + '" loading="' + (index > 3 ? 'lazy' : 'eager') + '" />' +
-      (product.badge ? '<span class="product-badge">' + escapeHtml(product.badge) + '</span>' : '') + controls +
+      (product.badge ? '<span class="product-badge">' + escapeHtml(product.badge) + '</span>' : '') + cardControls(product) +
       '</div><div class="product-info"><p class="product-category">' + escapeHtml(product.category) + '</p>' +
       '<h3>' + name + '</h3><div class="product-bottom"><span class="product-price">$' + formatPrice(product.price) +
       ' CUP</span><button class="detail-link" type="button" data-product="' + id + '">Ver detalles</button></div></div></article>';
   }).join("");
+}
+
+function syncProductControls() {
+  for (const media of grid.querySelectorAll(".product-media")) {
+    const product = state.products.find((item) => item.id === media.dataset.product);
+    if (!product) continue;
+    const quantity = state.cart[product.id] || 0;
+    const current = media.querySelector(".card-quantity, .quick-add");
+    if (!current) continue;
+    if (quantity && current.classList.contains("card-quantity")) {
+      current.setAttribute("aria-label", quantity + " de " + product.name + " en tu pedido");
+      current.querySelector("span").textContent = quantity;
+      continue;
+    }
+    if (!quantity && current.classList.contains("quick-add")) continue;
+    const hadFocus = current.contains(document.activeElement);
+    current.outerHTML = cardControls(product);
+    if (hadFocus) media.querySelector(quantity ? "[data-card-increase]" : ".quick-add")?.focus({ preventScroll: true });
+  }
 }
 
 function cartEntries() {
@@ -110,7 +134,7 @@ function renderCart() {
       '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3" /></svg></button></article>';
   }).join("");
   saveCart();
-  renderProducts();
+  syncProductControls();
   renderDialogControls();
 }
 
@@ -295,6 +319,7 @@ async function loadCatalog() {
   }
   state.categories = ["Todos", ...catalog.categories];
   renderCategories();
+  renderProducts();
   renderCart();
   setupModelContextTools();
 }
