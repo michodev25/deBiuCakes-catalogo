@@ -1,4 +1,4 @@
-const WHATSAPP_NUMBER = "";
+const WHATSAPP_NUMBER = "5352001457";
 const state = { products: [], categories: ["Todos"], category: "Todos", search: "", cart: readCart(), activeProduct: null };
 const grid = document.querySelector("#product-grid");
 const categoryList = document.querySelector("#category-list");
