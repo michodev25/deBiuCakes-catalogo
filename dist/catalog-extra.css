@@ -55,8 +55,27 @@
 .dialog-quantity[hidden] { display: none; }
 .currency-bar { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px 22px; margin: -13px 0 24px; }
 .currency-picker { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font-size: .75rem; font-weight: 800; white-space: nowrap; }
-.currency-picker select { min-height: 42px; padding: 0 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--white); color: var(--ink); font: inherit; cursor: pointer; }
-.currency-picker select:focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
+.currency-control { position: relative; z-index: 5; }
+.currency-trigger { display: inline-flex; align-items: center; justify-content: space-between; gap: 12px; min-width: 150px; min-height: 42px; padding: 0 13px 0 16px; border: 1px solid var(--line); border-radius: 999px; background: var(--white); color: var(--ink); font: inherit; font-weight: 800; cursor: pointer; transition: border-color .18s ease, box-shadow .18s ease, background .18s ease; }
+.currency-trigger:hover, .currency-trigger[aria-expanded="true"] { border-color: var(--rose); background: #fffdf9; box-shadow: 0 5px 16px rgba(175,72,107,.1); }
+.currency-trigger:focus-visible { outline: 3px solid var(--rose); outline-offset: 2px; }
+.currency-trigger svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform .18s ease; }
+.currency-trigger[aria-expanded="true"] svg { transform: rotate(180deg); }
+.currency-options { position: absolute; top: calc(100% + 8px); left: 0; z-index: 15; width: 224px; padding: 6px; border: 1px solid rgba(175,72,107,.2); border-radius: 17px; background: var(--ivory); box-shadow: 0 16px 38px rgba(65,47,55,.18), 0 2px 8px rgba(65,47,55,.06); animation: currency-drop .16s ease-out both; }
+.currency-options[hidden] { display: none; }
+@keyframes currency-drop { from { opacity: 0; transform: translateY(-5px); } }
+.currency-option { display: grid; grid-template-columns: 34px 1fr 18px; align-items: center; gap: 10px; width: 100%; min-height: 54px; padding: 7px 9px; border: 0; border-radius: 12px; background: transparent; color: var(--ink); text-align: left; cursor: pointer; }
+.currency-option:hover, .currency-option:focus-visible { outline: none; background: var(--rose-soft); }
+.currency-option:focus-visible { box-shadow: inset 0 0 0 2px var(--rose); }
+.currency-option[aria-checked="true"] { background: linear-gradient(110deg, var(--rose-soft), rgba(185,220,231,.35)); }
+.currency-option-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; font-size: .95rem; font-weight: 800; }
+.currency-option-icon-usd { background: #f5d5df; color: var(--rose-dark); }
+.currency-option-icon-cup { background: var(--blue); color: var(--ink); }
+.currency-option-copy { display: flex; flex-direction: column; line-height: 1.25; }
+.currency-option-copy strong { font-size: .76rem; letter-spacing: .04em; }
+.currency-option-copy small { margin-top: 2px; color: var(--muted); font-size: .66rem; font-weight: 600; }
+.currency-option-check { color: var(--rose-dark); font-size: .9rem; font-weight: 800; opacity: 0; }
+.currency-option[aria-checked="true"] .currency-option-check { opacity: 1; }
 .rate-note { display: flex; flex-wrap: wrap; align-items: center; gap: 5px 12px; margin: 0; color: var(--muted); font-size: .72rem; line-height: 1.5; }
 .rate-note a { color: var(--rose-dark); font-weight: 800; text-decoration: underline; text-underline-offset: 2px; }
 .product-price, .cart-item-price, [data-cart-total], [data-dialog-price] { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; }

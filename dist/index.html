@@ -104,12 +104,27 @@
         </div>
 
         <div class="currency-bar">
-          <label class="currency-picker" for="currency-select">Ver precios en
-            <select id="currency-select" name="currency">
-              <option value="USD">USD · dólares</option>
-              <option value="CUP">CUP · pesos</option>
-            </select>
-          </label>
+          <div class="currency-picker">
+            <span id="currency-label">Ver precios en</span>
+            <div class="currency-control">
+              <button class="currency-trigger" id="currency-trigger" type="button" aria-haspopup="menu" aria-expanded="false" aria-controls="currency-menu" aria-labelledby="currency-label currency-current">
+                <span id="currency-current">USD · dólares</span>
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
+              </button>
+              <div class="currency-options" id="currency-menu" role="menu" aria-label="Moneda de los precios" hidden>
+                <button class="currency-option" type="button" role="menuitemradio" aria-checked="true" data-currency-choice="USD" tabindex="-1">
+                  <span class="currency-option-icon currency-option-icon-usd" aria-hidden="true">$</span>
+                  <span class="currency-option-copy"><strong>USD</strong><small>Dólares</small></span>
+                  <span class="currency-option-check" aria-hidden="true">✓</span>
+                </button>
+                <button class="currency-option" type="button" role="menuitemradio" aria-checked="false" data-currency-choice="CUP" tabindex="-1">
+                  <span class="currency-option-icon currency-option-icon-cup" aria-hidden="true">C</span>
+                  <span class="currency-option-copy"><strong>CUP</strong><small>Pesos cubanos</small></span>
+                  <span class="currency-option-check" aria-hidden="true">✓</span>
+                </button>
+              </div>
+            </div>
+          </div>
           <p class="rate-note"><span data-rate-label>Conversión referencial: 1 USD = 710 CUP · 19 sep 2026, sin actualización automática</span><a href="https://eltoque.com/tasas-de-cambio-cuba/dolar" target="_blank" rel="noopener noreferrer">Fuente: elTOQUE ↗</a></p>
         </div>
 

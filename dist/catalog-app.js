@@ -3,7 +3,11 @@ const state = { products: [], categories: ["Todos"], category: "Todos", search: 
   rate: { usdCup: 710, source: "reference", observedAt: "2026-09-19", stale: true } };
 const grid = document.querySelector("#product-grid");
 const categoryList = document.querySelector("#category-list");
-const currencySelect = document.querySelector("#currency-select");
+const currencyPicker = document.querySelector(".currency-picker");
+const currencyTrigger = document.querySelector("#currency-trigger");
+const currencyMenu = document.querySelector("#currency-menu");
+const currencyCurrent = document.querySelector("#currency-current");
+const currencyOptions = [...currencyMenu.querySelectorAll("[data-currency-choice]")];
 const searchInput = document.querySelector("#search");
 const emptyState = document.querySelector("#empty-state");
 const resultCount = document.querySelector("[data-result-count]");
@@ -319,12 +323,66 @@ categoryList.addEventListener("click", (event) => {
   renderCategories();
   renderProducts();
 });
-currencySelect.value = state.currency;
-currencySelect.addEventListener("change", (event) => {
-  if (!["USD", "CUP"].includes(event.target.value)) return;
-  state.currency = event.target.value;
+function syncCurrencyMenu() {
+  currencyCurrent.textContent = state.currency === "CUP" ? "CUP · pesos" : "USD · dólares";
+  currencyOptions.forEach((option) => {
+    option.setAttribute("aria-checked", String(option.dataset.currencyChoice === state.currency));
+  });
+}
+
+function closeCurrencyMenu(restoreFocus = false) {
+  if (currencyMenu.hidden) return;
+  currencyMenu.hidden = true;
+  currencyTrigger.setAttribute("aria-expanded", "false");
+  if (restoreFocus) currencyTrigger.focus();
+}
+
+function openCurrencyMenu(focusIndex = currencyOptions.findIndex((option) => option.dataset.currencyChoice === state.currency)) {
+  currencyMenu.hidden = false;
+  currencyTrigger.setAttribute("aria-expanded", "true");
+  currencyOptions[Math.max(0, focusIndex)].focus();
+}
+
+function chooseCurrency(value) {
+  if (!["USD", "CUP"].includes(value)) return;
+  state.currency = value;
   try { localStorage.setItem("labiucakes-currency", state.currency); } catch { /* La selección sigue activa durante esta visita. */ }
+  syncCurrencyMenu();
   renderPrices();
+  closeCurrencyMenu(true);
+}
+
+syncCurrencyMenu();
+currencyTrigger.addEventListener("click", () => {
+  if (currencyMenu.hidden) openCurrencyMenu();
+  else closeCurrencyMenu(true);
+});
+currencyMenu.addEventListener("click", (event) => {
+  const option = event.target.closest("[data-currency-choice]");
+  if (option) chooseCurrency(option.dataset.currencyChoice);
+});
+currencyPicker.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !currencyMenu.hidden) {
+    event.preventDefault();
+    closeCurrencyMenu(true);
+  } else if (event.key === "ArrowDown" || event.key === "ArrowUp") {
+    event.preventDefault();
+    if (currencyMenu.hidden) openCurrencyMenu(event.key === "ArrowDown" ? 0 : currencyOptions.length - 1);
+    else {
+      const index = currencyOptions.indexOf(document.activeElement);
+      const next = (index + (event.key === "ArrowDown" ? 1 : -1) + currencyOptions.length) % currencyOptions.length;
+      currencyOptions[next].focus();
+    }
+  } else if (!currencyMenu.hidden && (event.key === "Home" || event.key === "End")) {
+    event.preventDefault();
+    currencyOptions[event.key === "Home" ? 0 : currencyOptions.length - 1].focus();
+  }
+});
+currencyPicker.addEventListener("focusout", (event) => {
+  if (!currencyPicker.contains(event.relatedTarget)) closeCurrencyMenu();
+});
+document.addEventListener("pointerdown", (event) => {
+  if (!currencyPicker.contains(event.target)) closeCurrencyMenu();
 });
 searchInput.addEventListener("input", (event) => { state.search = event.target.value; renderProducts(); });
 grid.addEventListener("click", (event) => {

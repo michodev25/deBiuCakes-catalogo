@@ -34,7 +34,7 @@ async function evaluate(expression) {
   return result.result.value;
 }
 async function waitFor(expression, expected = true) {
-  for (let attempt = 0; attempt < 40; attempt++) {
+  for (let attempt = 0; attempt < 80; attempt++) {
     if (await evaluate(expression) === expected) return;
     await new Promise((resolve) => setTimeout(resolve, 150));
   }
@@ -50,14 +50,28 @@ try {
   await evaluate('localStorage.removeItem("labiucakes-cart"); localStorage.removeItem("labiucakes-currency"); location.reload()');
   await waitFor('document.querySelectorAll(".product-card").length === 8');
   assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, 'La página no debe desbordarse horizontalmente.');
-  assert.equal(await evaluate('document.querySelector("#currency-select").value'), 'USD');
+  assert.match(await evaluate('document.querySelector("#currency-current").textContent'), /USD/);
+  assert.equal(await evaluate('document.querySelector("#currency-trigger").getAttribute("aria-expanded")'), 'false');
   assert.equal(await evaluate('document.querySelector(".product-price .price-primary").classList.contains("price-usd")'), true);
   assert.equal(await evaluate('document.querySelectorAll(".product-card .price-usd").length'), 8);
   assert.equal(await evaluate('document.querySelectorAll(".product-card .price-cup").length'), 8);
   await waitFor('document.querySelector("[data-rate-label]").textContent.startsWith("Referencia manual") || document.querySelector("[data-rate-label]").textContent.startsWith("Tasa consultada de elTOQUE")');
   assert.match(await evaluate('document.querySelector("[data-rate-label]").textContent'), /referencia manual|Tasa consultada de elTOQUE/i);
   await evaluate('window.__firstCard = document.querySelector(".product-card")');
-  await evaluate('document.querySelector("#currency-select").value = "CUP"; document.querySelector("#currency-select").dispatchEvent(new Event("change", { bubbles: true }))');
+  await evaluate('document.querySelector("#currency-trigger").click()');
+  assert.equal(await evaluate('document.querySelector("#currency-menu").hidden'), false);
+  assert.equal(await evaluate('document.querySelectorAll("#currency-menu [role=menuitemradio]").length'), 2);
+  const menuLayout = await evaluate('(() => { const menu = document.querySelector("#currency-menu"); const trigger = document.querySelector("#currency-trigger"); const box = menu.getBoundingClientRect(); return { background: getComputedStyle(menu).backgroundColor, top: box.top, right: box.right, triggerBottom: trigger.getBoundingClientRect().bottom, optionHeight: menu.querySelector(".currency-option").getBoundingClientRect().height }; })()');
+  assert.notEqual(menuLayout.background, 'rgba(0, 0, 0, 0)', 'El menú abierto debe tener fondo diseñado.');
+  assert.equal(menuLayout.top >= menuLayout.triggerBottom && menuLayout.right <= 390 && menuLayout.optionHeight >= 44, true, 'Las opciones deben caber y ser táctiles en móvil.');
+  await evaluate('document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true }))');
+  assert.equal(await evaluate('document.activeElement.dataset.currencyChoice'), 'CUP');
+  await evaluate('document.activeElement.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))');
+  assert.equal(await evaluate('document.querySelector("#currency-menu").hidden'), true);
+  assert.equal(await evaluate('document.activeElement.id'), 'currency-trigger');
+  await evaluate('document.querySelector("#currency-trigger").click(); document.querySelector("[data-currency-choice=CUP]").click()');
+  assert.equal(await evaluate('document.querySelector("[data-currency-choice=CUP]").getAttribute("aria-checked")'), 'true');
+  assert.equal(await evaluate('document.querySelector("#currency-menu").hidden'), true);
   assert.equal(await evaluate('document.querySelector(".product-price .price-primary").classList.contains("price-cup")'), true);
   assert.equal(await evaluate('document.documentElement.scrollWidth <= window.innerWidth'), true, 'Los precios en CUP no deben desbordar el móvil.');
   assert.equal(await evaluate('document.querySelector(".product-card") === window.__firstCard'), true, 'Cambiar de moneda no debe reconstruir las tarjetas.');
@@ -92,7 +106,7 @@ try {
   await evaluate('document.querySelector("[data-close-cart]").click()');
   await evaluate('location.reload()');
   await waitFor('document.querySelectorAll(".product-card").length === 8');
-  assert.equal(await evaluate('document.querySelector("#currency-select").value'), 'CUP', 'La moneda elegida debe conservarse al recargar.');
+  assert.match(await evaluate('document.querySelector("#currency-current").textContent'), /CUP/, 'La moneda elegida debe conservarse al recargar.');
   assert.equal(await evaluate('document.querySelector(".product-price .price-primary").classList.contains("price-cup")'), true);
   await send('Page.navigate', { url: site + '/cakeadmin' });
   await waitFor('document.querySelector("#login-form") !== null');
