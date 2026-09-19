@@ -2,9 +2,9 @@
 
 ## Decisión
 
-El cliente elige la moneda destacada mediante un `<select>` nativo «Ver precios en» con USD y CUP. USD es el valor inicial. Se mantienen ambas monedas visibles porque el catálogo debe informar las dos: la elegida aparece primero y con mayor énfasis; la otra queda debajo. La preferencia se guarda únicamente en `localStorage` y no modifica el JSON ni la tasa de elTOQUE.
+El cliente elige la moneda destacada mediante un desplegable «Ver precios en» con USD y CUP. USD es el valor inicial. Se mantienen ambas monedas visibles porque el catálogo debe informar las dos: la elegida aparece primero y con mayor énfasis; la otra queda debajo. La preferencia se guarda únicamente en `localStorage` y no modifica el JSON ni la tasa de elTOQUE.
 
-Se consideraron tres controles: desplegable nativo, menú personalizado y botones segmentados. El desplegable coincide con la interacción solicitada, ocupa poco espacio en móvil y ofrece soporte de teclado y lector de pantalla sin lógica adicional.
+Se consideraron tres controles: desplegable nativo, menú personalizado y botones segmentados. El desplegable coincide con la interacción solicitada y ocupa poco espacio en móvil. La primera versión usó `<select>` nativo; la captura del usuario mostró que las opciones abiertas heredaban el azul antiguo del sistema, imposible de estilizar de forma fiable. Se reemplaza por un botón y menú personalizado con las dos opciones, marcado semántico de selección, Escape, navegación por flechas, clic fuera y foco controlado. El acabado retoma marfil, rosa y azul claro del catálogo.
 
 ## Comportamiento
 
