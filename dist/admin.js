@@ -4,7 +4,7 @@ const admin = {
   sha: null,
   editorId: null,
   renamingCategory: null,
-  rate: { usdCup: 710, source: "reference", observedAt: "2026-09-19", stale: true },
+  rate: { usdCup: 735, source: "reference", observedAt: "2026-09-19", stale: true },
   busy: false
 };
 

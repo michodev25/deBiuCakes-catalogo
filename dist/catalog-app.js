@@ -1,6 +1,6 @@
 const WHATSAPP_NUMBER = "5352001457";
 const state = { products: [], categories: ["Todos"], category: "Todos", search: "", cart: readCart(), currency: readCurrency(), activeProduct: null,
-  rate: { usdCup: 710, source: "reference", observedAt: "2026-09-19", stale: true } };
+  rate: { usdCup: 735, source: "reference", observedAt: "2026-09-19", stale: true } };
 const grid = document.querySelector("#product-grid");
 const categoryList = document.querySelector("#category-list");
 const currencyPicker = document.querySelector(".currency-picker");

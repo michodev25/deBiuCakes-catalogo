@@ -22,7 +22,7 @@ No se usa base de datos. El catálogo público consulta la API para ver los camb
 5. Genera CAKEADMIN_SESSION_SECRET con al menos 32 caracteres aleatorios. Vuelve a desplegar tras configurar las variables.
 6. Para actualizar CUP con elTOQUE, solicita una clave en [su formulario oficial](https://tasas-token.eltoque.com/). Registra LaBiu Dulceria Panaderia como aplicación, usa el dominio público de Vercel como URL y selecciona «Servidor» como origen de las peticiones. Una vez que la recibas por correo, agrega `ELTOQUE_API_TOKEN` en las variables privadas de Vercel y vuelve a desplegar. No compartas el token por chat ni lo subas a GitHub.
 
-Sin token o si elTOQUE no responde, la interfaz indica que usa una referencia manual del 19 de septiembre de 2026: 1 USD = 710 CUP. No presenta esa referencia como tasa en vivo. La API oficial aún necesita probarse con un token real porque su documentación no especifica el formato de la respuesta exitosa.
+Sin token o si elTOQUE no responde, la interfaz indica que usa una referencia manual del 19 de septiembre de 2026: 1 USD = 735 CUP. No presenta esa referencia como tasa en vivo. La API oficial aún necesita probarse con un token real porque su documentación no especifica el formato de la respuesta exitosa.
 
 Las contraseñas numéricas iniciales fueron compartidas en el chat. Conviene cambiarlas por otras largas antes de poner el panel en producción. Si cambias una contraseña, cambia también CAKEADMIN_SESSION_SECRET para cerrar sesiones anteriores.
 

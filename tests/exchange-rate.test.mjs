@@ -15,7 +15,7 @@ test('without a token, the endpoint returns a clearly stale dated reference', as
   try {
     const response = await exchangeRateApi.fetch(new Request('https://cakes.example/api/exchange-rate'));
     assert.equal(response.status, 200);
-    assert.deepEqual(await response.json(), { usdCup: 710, source: 'reference', observedAt: '2026-09-19', stale: true });
+    assert.deepEqual(await response.json(), { usdCup: 735, source: 'reference', observedAt: '2026-09-19', stale: true });
     const rejected = await exchangeRateApi.fetch(new Request('https://cakes.example/api/exchange-rate', { method: 'POST' }));
     assert.equal(rejected.status, 405);
   } finally {
