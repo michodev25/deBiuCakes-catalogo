@@ -72,6 +72,8 @@ svg { fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round
 .wordmark { display: inline-flex; flex-direction: column; width: fit-content; text-decoration: none; line-height: .85; }
 .wordmark span { font-family: "Fraunces", serif; font-size: 2rem; font-weight: 700; letter-spacing: -.08em; color: var(--rose-dark); }
 .wordmark small { margin-top: 6px; color: var(--blue-deep); font-size: .58rem; font-weight: 800; letter-spacing: .4em; }
+.brand-mark { flex: 0 0 auto; width: 126px; height: 72px; justify-content: center; }
+.brand-mark img { width: 100%; height: 100%; object-fit: contain; }
 .desktop-nav { display: flex; align-items: center; gap: 34px; font-size: .86rem; font-weight: 700; }
 .desktop-nav a { position: relative; text-decoration: none; }
 .desktop-nav a::after { content: ""; position: absolute; left: 50%; bottom: -11px; width: 5px; height: 5px; transform: translateX(-50%) scale(0); border-radius: 50%; background: var(--rose); transition: transform .2s ease; }
@@ -174,7 +176,7 @@ main { overflow: clip; }
 .how-to li p { margin: 6px 0 0; color: rgba(65,47,55,.72); font-size: .82rem; }
 
 footer { width: var(--page); margin: 0 auto; padding: 55px 0 100px; display: grid; grid-template-columns: 1.4fr 1fr auto; gap: 36px; align-items: end; border-top: 1px solid var(--line); }
-.footer-mark span { font-size: 2.6rem; }
+.footer-mark { width: 184px; height: 118px; margin: -24px 0 -18px; }
 footer > p { margin: 0; max-width: 330px; color: var(--muted); font-size: .85rem; }
 .footer-links { display: flex; gap: 20px; }
 .footer-links a { font-size: .78rem; font-weight: 700; text-decoration: none; }
@@ -255,7 +257,8 @@ footer > small { grid-column: 1 / -1; color: #9b8b91; font-size: .7rem; }
   body { padding-bottom: 72px; }
   .announcement { min-height: 30px; font-size: .61rem; }
   .site-header { position: relative; }
-  .wordmark span { font-size: 1.75rem; }
+  .brand-mark { width: 105px; height: 62px; }
+  .footer-mark { width: 168px; height: 108px; margin: -20px 0 -16px; }
   .cart-button { display: none; }
   .intro { min-height: 300px; display: grid; grid-template-columns: minmax(0, 1fr) 112px; align-items: center; gap: 14px; padding: 24px 0 30px; }
   .intro-copy { display: flex; flex-direction: column; align-items: flex-start; }

@@ -261,7 +261,7 @@ function checkout() {
     return "• " + quantity + " × " + product.name + " — " + formatPricePair(subtotal);
   });
   const total = entries.reduce((sum, entry) => sum + Math.round(entry.product.priceUsd * 100) * entry.quantity, 0) / 100;
-  const message = ["Hola, LaBiuCakes. Quisiera consultar este pedido:", "", ...lines, "",
+  const message = ["Hola, LaBiu Dulceria Panaderia. Quisiera consultar este pedido:", "", ...lines, "",
     "Total estimado: " + formatPricePair(total), rateLabel(),
     note ? "Nota: " + note : ""].filter(Boolean).join("\n");
   if (!WHATSAPP_NUMBER) {
@@ -281,7 +281,7 @@ function setupModelContextTools() {
   register({
     name: "read_catalog",
     title: "Consultar catálogo",
-    description: "Devuelve los productos disponibles de LaBiuCakes.",
+    description: "Devuelve los productos disponibles de LaBiu Dulceria Panaderia.",
     inputSchema: { type: "object", properties: { query: { type: "string", maxLength: 80 }, category: { type: "string" } }, additionalProperties: false },
     annotations: { readOnlyHint: true, untrustedContentHint: false },
     execute(input = {}) {

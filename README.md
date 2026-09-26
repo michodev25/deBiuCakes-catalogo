@@ -1,4 +1,4 @@
-# LaBiuCakes · catálogo y Cakeadmin
+# LaBiu Dulceria Panaderia · catálogo y Cakeadmin
 
 Catálogo estático de repostería con carrito. El panel de administración está en /cakeadmin. Los precios base se guardan en USD; el equivalente en CUP se calcula al mostrar cada página.
 
@@ -20,7 +20,7 @@ No se usa base de datos. El catálogo público consulta la API para ver los camb
 3. Crea un token fine-grained de GitHub limitado a este repositorio, con permiso Contents: Read and write. Ponlo como GITHUB_TOKEN. GITHUB_REPOSITORY debe apuntar al mismo repositorio que despliega Vercel.
 4. Crea una cuenta de Cloudinary y copia Cloud name, API key y API secret. La subida usa una firma generada en el servidor; no requiere un preset público.
 5. Genera CAKEADMIN_SESSION_SECRET con al menos 32 caracteres aleatorios. Vuelve a desplegar tras configurar las variables.
-6. Para actualizar CUP con elTOQUE, solicita una clave en [su formulario oficial](https://tasas-token.eltoque.com/). Registra LaBiuCakes como aplicación, usa el dominio público de Vercel como URL y selecciona «Servidor» como origen de las peticiones. Una vez que la recibas por correo, agrega `ELTOQUE_API_TOKEN` en las variables privadas de Vercel y vuelve a desplegar. No compartas el token por chat ni lo subas a GitHub.
+6. Para actualizar CUP con elTOQUE, solicita una clave en [su formulario oficial](https://tasas-token.eltoque.com/). Registra LaBiu Dulceria Panaderia como aplicación, usa el dominio público de Vercel como URL y selecciona «Servidor» como origen de las peticiones. Una vez que la recibas por correo, agrega `ELTOQUE_API_TOKEN` en las variables privadas de Vercel y vuelve a desplegar. No compartas el token por chat ni lo subas a GitHub.
 
 Sin token o si elTOQUE no responde, la interfaz indica que usa una referencia manual del 19 de septiembre de 2026: 1 USD = 710 CUP. No presenta esa referencia como tasa en vivo. La API oficial aún necesita probarse con un token real porque su documentación no especifica el formato de la respuesta exitosa.
 
